@@ -1,0 +1,22 @@
+{
+  "name": "baseline",
+  "version": "0.1.0",
+  "main": "build/baseline.js",
+  "description": "A simple, extensible and reliable text editing component for the web.",
+  "scripts": {
+    "test": "mocha --recursive tests",
+    "test-live": "mocha -w --recursive tests"
+  },
+  "author": "Elisha Fitch-Cook <elisha@cooper.com>",
+  "license": "MIT",
+  "dependencies": {
+    "immutable": "^3.7.2"
+  },
+  "devDependencies": {
+    "brunch": "^1.8.0",
+    "chai": "^2.2.0",
+    "javascript-brunch": "^1.7.1",
+    "mocha": "^2.2.4",
+    "uglify-js-brunch": "^1.7.8"
+  }
+}
