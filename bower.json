@@ -1,0 +1,23 @@
+{
+  "name": "baseline",
+  "version": "0.1.0",
+  "description": "More saner rich text editing for the web",
+  "main": "build/baseline.js",
+  "moduleType": [
+    "node"
+  ],
+  "authors": [
+    "Elisha Fitch-Cook <elisha@cooper.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "virtual-dom": "~2.0.1"
+  }
+}
