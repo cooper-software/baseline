@@ -20,46 +20,6 @@ describe('blocks.ListBlock', function ()
 		expect(block.regions()).to.eql(block.text_regions)
 	})
 	
-	it('can insert a text region', function ()
-	{
-		var region = new TextRegion({ text: 'foo'}),
-			block = (new ListBlock()).insert(0, region)
-		
-		expect(block.regions().length).to.equal(1)
-		expect(block.regions()[0]).to.equal(region)
-		
-		var block2 = new ListBlock({ text_regions: [new TextRegion({text:'foo'}), new TextRegion({text:'bar'})] }),
-			block3 = block2.insert(1, new TextRegion({text:'baz'}))
-		
-		expect(block3.regions().length).to.equal(3)
-		expect(block3.regions()[0].text).to.equal('foo')
-		expect(block3.regions()[1].text).to.equal('baz')
-		expect(block3.regions()[2].text).to.equal('bar')
-	})
-	
-	it('can replace a text region', function ()
-	{
-		var block = new ListBlock({ text_regions: [new TextRegion({text:'foo'}), new TextRegion({text:'bar'})] }),
-			block2 = block.replace(1, new TextRegion({text:'baz'}))
-		
-		expect(block2.regions().length).to.equal(2)
-		expect(block2.regions()[0].text).to.equal('foo')
-		expect(block2.regions()[1].text).to.equal('baz')
-	})
-	
-	it('can remove a text region', function ()
-	{
-		var block = (new ListBlock({ text_regions: [
-						new TextRegion({text:'foo'}), 
-						new TextRegion({text:'bar'}),
-						new TextRegion({text:'baz'})
-					]})).remove(1)
-		
-		expect(block.regions().length).to.equal(2)
-		expect(block.regions()[0].text).to.equal('foo')
-		expect(block.regions()[1].text).to.equal('baz')
-	})
-	
 	it('renders correctly', function ()
 	{
 		var block = new ListBlock({
