@@ -10,7 +10,7 @@ describe("Model", function ()
 		var Foo = Model(),
 			foo = new Foo()
 		
-		expect(Object.keys(foo)).to.eql(['update', 'equals'])
+		expect(Object.keys(foo)).to.eql(['_version', 'update', 'equals'])
 	})
 	
 	it('has the properties passed to the constructor and they are read-only', function ()
@@ -59,6 +59,15 @@ describe("Model", function ()
 			foo_copy = foo.update()
 		
 		expect(foo.equals(foo_copy)).to.be.true
+	})
+	
+	it('is not equal to a copy of itself when version checking', function ()
+	{
+		var Foo = Model(),
+			foo = new Foo(),
+			foo_copy = foo.update()
+		
+		expect(foo.equals(foo_copy, null, true)).to.be.false
 	})
 	
 	it('is not equal to a copy of itself with different properties', function ()
@@ -129,5 +138,26 @@ describe("Model", function ()
 			bad = function () { new Foo({ baz: 77 }) }
 		
 		expect(bad).to.throw('Unknown property "baz"')
+	})
+	
+	it('has a version number that increments on each update', function ()
+	{
+		var Foo = Model(),
+			foo = new Foo()
+			
+		expect(foo._version).to.equal(1)
+		var foo2 = foo.update()
+		expect(foo._version).to.equal(1)
+		expect(foo2._version).to.equal(2)
+		var foo3 = foo.update()
+		expect(foo._version).to.equal(1)
+		expect(foo2._version).to.equal(2)
+		expect(foo3._version).to.equal(3)
+		var foo4 = foo2.update()
+		expect(foo._version).to.equal(1)
+		expect(foo2._version).to.equal(2)
+		expect(foo3._version).to.equal(3)
+		expect(foo4._version).to.equal(4)
+		
 	})
 })
