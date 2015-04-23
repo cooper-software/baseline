@@ -22,6 +22,7 @@ module.exports = Model(
 {
 	precedence: 1000,
 	tag: 'SPAN',
+	tag_aliases: new Set([]),
 	attrs: new Set([]),
 	styles: new Set([]),
 	
