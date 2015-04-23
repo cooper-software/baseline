@@ -95,3 +95,6 @@ migration/data-*
 
 # Auto-generated sitemaps
 sitemap.xml
+
+# Coverage reports
+coverage/

@@ -1,11 +1,14 @@
 {
   "name": "baseline",
   "version": "0.1.0",
-  "main": "build/baseline.js",
+  "main": "baseline",
   "description": "More saner rich text editing for the web",
   "scripts": {
-    "test": "mocha --recursive tests",
-    "test-live": "mocha -w --recursive tests"
+    "build": "gulp",
+    "build-watch": "gulp watch",
+    "test": "mocha tests --recursive",
+    "test-watch": "mocha tests --recursive -w",
+    "coverage": "istanbul cover _mocha -- tests --recursive; echo \"\nCoverage report is available at ./coverage/lcov-report/index.html\""
   },
   "author": "Elisha Fitch-Cook <elisha@cooper.com>",
   "license": "MIT",
@@ -13,7 +16,16 @@
     "virtual-dom": "^2.0.1"
   },
   "devDependencies": {
+    "browserify": "^9.0.8",
     "chai": "^2.2.0",
-    "mocha": "^2.2.4"
+    "gulp": "^3.8.11",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
+    "gulp-util": "^3.0.4",
+    "istanbul": "^0.3.13",
+    "mocha": "^2.2.4",
+    "uglify-js": "^2.4.20",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

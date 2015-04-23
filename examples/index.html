@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Baseline Example</title>
+	<style>
+	body
+	{
+		margin: 0;
+		padding: 0;
+		font-family: sans-serif;
+	}
+	#toolbar
+	{
+		margin: 0;
+		padding: 0.25em 2em;
+		background-color: #3c3333;
+		list-style: none;
+		text-align: center;
+	}
+	#toolbar li
+	{
+		display: inline-block;
+		margin-right: 0.25em;
+		padding: 0;
+		margin: 0;
+	}
+	#toolbar a
+	{
+		display: block;
+		background-color: #7c7777;
+		padding: 0.25em 0.5em;
+		font-size: 0.8em;
+		font-weight: bold;
+		text-transform: uppercase;
+		text-decoration: none;
+		color: #efefef;
+	}
+	#toolbar a:hover
+	{
+		background-color: #eceeee;
+		color: #3c3333;
+	}
+	#editor
+	{
+		max-width: 45em;
+		margin: 0 auto;
+		padding: 0 1em;
+		border: 1px solid #efefef;
+		border-top: 0;
+		border-bottom: 0;
+	}
+	</style>
+</head>
+<body>
+	<ul id="toolbar">
+		<li><a class="command" href="#">Bold</a></li>
+		<li><a class="command" href="#">Italic</a></li>
+		<li><a class="command" href="#">Underline</a></li>
+	</ul>
+	<div id="editor">
+		<p>This is some text</p>
+	</div>
+	<script src="../build/baseline.min.js"></script>
+	<script>
+	var editor = new baseline.Editor({ container: document.getElementById('editor') })
+	</script>
+</body>
+</html>
