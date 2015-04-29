@@ -10,7 +10,7 @@ describe("Model", function ()
 		var Foo = Model(),
 			foo = new Foo()
 		
-		expect(Object.keys(foo)).to.eql(['_version', 'update', 'equals'])
+		expect(Object.keys(foo)).to.eql(['update', 'equals'])
 	})
 	
 	it('has the properties passed to the constructor and they are read-only', function ()
@@ -59,15 +59,6 @@ describe("Model", function ()
 			foo_copy = foo.update()
 		
 		expect(foo.equals(foo_copy)).to.be.true
-	})
-	
-	it('is not equal to a copy of itself when version checking', function ()
-	{
-		var Foo = Model(),
-			foo = new Foo(),
-			foo_copy = foo.update()
-		
-		expect(foo.equals(foo_copy, null, true)).to.be.false
 	})
 	
 	it('is not equal to a copy of itself with different properties', function ()
@@ -140,24 +131,61 @@ describe("Model", function ()
 		expect(bad).to.throw('Unknown property "baz"')
 	})
 	
-	it('has a version number that increments on each update', function ()
+	it('allows extending from a parent model', function ()
 	{
-		var Foo = Model(),
-			foo = new Foo()
+		var Foo = Model({ things: 23 }),
+			Bar = Model.extend(Foo, { stuff: function () { return this.things } }),
+			bar = new Bar()
 			
-		expect(foo._version).to.equal(1)
-		var foo2 = foo.update()
-		expect(foo._version).to.equal(1)
-		expect(foo2._version).to.equal(2)
-		var foo3 = foo.update()
-		expect(foo._version).to.equal(1)
-		expect(foo2._version).to.equal(2)
-		expect(foo3._version).to.equal(3)
-		var foo4 = foo2.update()
-		expect(foo._version).to.equal(1)
-		expect(foo2._version).to.equal(2)
-		expect(foo3._version).to.equal(3)
-		expect(foo4._version).to.equal(4)
+		expect(bar.things).to.equal(23)
+		expect(bar.stuff()).to.equal(23)
+	})
+	
+	it('allows checking if a model is an instance of another model', function ()
+	{
+		var Foo = Model({ things: 23 }),
+			Bar = Model.extend(Foo),
+			Baz = Model.extend(Bar),
+			Qux = Model(),
+			foo = new Foo(),
+			bar = new Bar(),
+			baz = new Baz()
+			
+		expect(Model.is_instance(foo, Qux)).to.be.false
+		expect(Model.is_instance(foo, Model)).to.be.true
+		expect(Model.is_instance(bar, Qux)).to.be.false
+		expect(Model.is_instance(bar, Model)).to.be.true
+		expect(Model.is_instance(bar, Foo)).to.be.true
+		expect(Model.is_instance(baz, Qux)).to.be.false
+		expect(Model.is_instance(baz, Model)).to.be.true
+		expect(Model.is_instance(baz, Foo)).to.be.true
+		expect(Model.is_instance(baz, Bar)).to.be.true
+	})
+	
+	it('can be versioned', function ()
+	{
+		var Foo = new Model({}, true),
+			foo = new Foo(),
+			foo2 = foo.update({})
 		
+		expect(Object.keys(foo)).to.eql(['_id', '_version', 'update', 'equals'])
+		expect(Foo._version).to.be.defined
+		expect(foo._id).to.be.defined
+		expect(foo._version).to.be.defined
+		expect(foo2._id).to.equal(foo._id)
+		expect(foo2._version).to.be.defined
+		expect(foo2._version).to.not.equal(foo._version)
+	})
+	
+	it('passes versioning on to children', function ()
+	{
+		var Foo = new Model({}, true),
+			Bar = Model.extend(Foo, {}),
+			bar = new Bar()
+		
+		expect(Bar._version).to.be.defined
+		expect(Bar._version).to.not.equal(Foo._version)
+		expect(Bar._id).to.be.defined
+		expect(Bar._version).to.be.defined
 	})
 })

@@ -14,7 +14,7 @@ gulp.task('build', function ()
         {
             entries: './baseline/index.js',
             debug: true,
-            bundleExternal: false,
+            bundleExternal: true,
             standalone: 'baseline'
         })
         .bundle()

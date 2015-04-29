@@ -1,14 +1,14 @@
 "use strict"
 
 var expect = require('chai').expect,
-	list = require('../baseline/list')
+	List = require('../baseline/List')
 	
 	
-describe('list', function ()
+describe('List', function ()
 {
 	it('has a non-destructive insert method', function ()
 	{
-		var list1 = list([1,2,3]),
+		var list1 = List([1,2,3]),
 			list2 = list1.insert(1, 55)
 		
 		expect(list1).to.deep.equal([1,2,3])
@@ -17,7 +17,7 @@ describe('list', function ()
 	
 	it('has a non-destructive replace method', function ()
 	{
-		var list1 = list([1,2,3]),
+		var list1 = List([1,2,3]),
 			list2 = list1.replace(1, 55)
 		
 		expect(list1).to.deep.equal([1,2,3])
@@ -26,7 +26,7 @@ describe('list', function ()
 	
 	it('has a non-destructive remove method', function ()
 	{
-		var list1 = list([1,2,3]),
+		var list1 = List([1,2,3]),
 			list2 = list1.remove(1)
 		
 		expect(list1).to.deep.equal([1,2,3])
@@ -35,7 +35,7 @@ describe('list', function ()
 	
 	it('has a non-destructive append method', function ()
 	{
-		var list1 = list([1,2,3]),
+		var list1 = List([1,2,3]),
 			list2 = list1.append(4)
 		
 		expect(list1).to.deep.equal([1,2,3])

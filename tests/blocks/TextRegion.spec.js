@@ -1,12 +1,12 @@
 "use strict"
 
 var expect = require("chai").expect,
-	AnnotationTree = require('../../baseline/annotations/AnnotationTree').AnnotationTree,
+	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType'),
-	TextRegion = require('../../baseline/regions/TextRegion')
+	TextRegion = require('../../baseline/blocks/TextRegion')
 	
-describe('regions.TextRegion', function ()
+describe('blocks.TextRegion', function ()
 {
 	it('has sensible defaults', function ()
 	{

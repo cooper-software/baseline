@@ -4,7 +4,7 @@ var list_methods =
 {
 	insert: function (index, item)
 	{
-		return list(
+		return List(
 			this.slice(0, index)
 				.concat([item])
 				.concat(this.slice(index))
@@ -13,7 +13,7 @@ var list_methods =
 
 	replace: function (index, item)
 	{
-		return list(
+		return List(
 			this.slice(0, index)
 				.concat([item])
 				.concat(this.slice(index+1))
@@ -22,20 +22,20 @@ var list_methods =
 
 	remove: function (index)
 	{
-		return list(
+		return List(
 			this.slice(0, index).concat(this.slice(index+1))
 		)
 	},
 
 	append: function (item)
 	{
-		return list(
+		return List(
 			this.concat([item])
 		)
 	}
 }
 
-var list = function (array)
+var List = function (array)
 {
 	array = array || []
 	
@@ -53,4 +53,4 @@ var list = function (array)
 	return array
 }
 
-module.exports = list
+module.exports = List

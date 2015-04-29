@@ -1,21 +1,17 @@
 "use strict"
 
-var Model = require('../Model'),
-	TextRegion = require('../regions/TextRegion'),
-	h = require('virtual-dom/h')
+var h = require('virtual-dom/h'),
+	Model = require('../Model'),
+	Block = require('./Block'),
+	TextRegion = require('./TextRegion')
 
-module.exports = Model(
+module.exports = Model.extend(Block,
 {
-	tag: 'p',
-	text_region: new TextRegion(),
-	
-	regions: function ()
-	{
-		return [ this.text_region ]
-	},
+	tag: 'P',
+	regions: [ new TextRegion() ],
 	
 	render: function ()
 	{
-		return h(this.tag, this.text_region.render())
+		return h(this.tag, this.regions[0].text == '' ? [ h('br') ] : this.regions[0].render())
 	}
 })

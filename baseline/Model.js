@@ -2,8 +2,6 @@
 
 function set_properties(obj, props, default_props)
 {
-	props = props || {}
-	
 	for (var k in props)
 	{
 		if (props.hasOwnProperty(k) && !default_props.hasOwnProperty(k))
@@ -24,16 +22,31 @@ function set_properties(obj, props, default_props)
 	})
 }
 
-module.exports = function (default_props)
+var model_version = 0
+
+var Model = function (default_props, versioned)
 {
-	var default_props = default_props || {}
+	var default_props = default_props || {},
+		instance_version = 0,
+		instance_id = 0
+	
+	if (versioned)
+	{
+		model_version++
+		default_props._id = model_version + '-' + instance_id
+		default_props._version = model_version + '-' + instance_version
+	}
 	
 	default_props.update = function (props)
 	{
+		if (versioned)
+		{
+			props._version = model_version + '-' + ++instance_version
+		}
 		return new this.constructor(props, this)
 	}
 	
-	var prop_equals = function (a, b)
+	var prop_equals = function (a, b, check_version)
 	{
 		if (a === b)
 		{
@@ -47,6 +60,11 @@ module.exports = function (default_props)
 		}
 		
 		if (a.constructor != b.constructor)
+		{
+			return false
+		}
+		
+		if (check_version && a._version != b._version)
 		{
 			return false
 		}
@@ -78,7 +96,7 @@ module.exports = function (default_props)
 		{
 			for (var k in a)
 			{
-				if (a.hasOwnProperty(k))
+				if (a.hasOwnProperty(k) && k != '_version')
 				{
 					if (!prop_equals(a[k], b[k]))
 					{
@@ -133,8 +151,57 @@ module.exports = function (default_props)
 		return true
 	}
 	
-	return function (props, default_props_arg)
+	var model = function (props, default_props_arg)
 	{
-		set_properties(this, props, default_props_arg || default_props)
+		props = props || {}
+		set_properties(this, props || {}, default_props_arg || default_props)
 	}
+	model._parent = Model
+	
+	if (versioned)
+	{
+		model._version = model_version
+	}
+	
+	return model
 }
+
+Model.extend = function (parent, props)
+{
+	var parent_inst = new parent(),
+		new_props = {},
+		props = props || {}
+	
+	Object.keys(parent_inst).forEach(function (k)
+	{
+		new_props[k] = parent_inst[k]
+	})
+	
+	Object.keys(props).forEach(function (k)
+	{
+		new_props[k] = props[k]
+	})
+	
+	var model = Model(new_props, typeof parent._version != "undefined")
+	model._parent = parent
+	return model
+}
+
+Model.is_instance = function (inst, model)
+{
+	var child = inst.constructor
+	
+	while (child._parent)
+	{
+		if (child._parent === model)
+		{
+			return true
+		}
+		
+		child = child._parent
+	}
+	
+	return false
+}
+
+module.exports = Model

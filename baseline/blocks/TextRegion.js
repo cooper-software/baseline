@@ -1,8 +1,8 @@
 "use strict"
 
-var Model = require('../Model'),
-	AnnotationTree = require('../annotations/AnnotationTree').AnnotationTree,
-	h = require('virtual-dom/h')
+var h = require('virtual-dom/h'),
+	Model = require('../Model'),
+	AnnotationTree = require('../annotations/AnnotationTree')
 
 module.exports = Model(
 {
@@ -88,14 +88,18 @@ module.exports = Model(
 	
 	fix_spaces: function (text)
 	{
-		return text.replace(/(^\s+)|(\s+$)/, function (match)
-		{
-			var spaces = []
-			for (var i=0; i<match.length; i++)
-			{
-				spaces.push('\u00A0')
-			}
-			return spaces
-		})
+		return text
+				.replace(/\s+/, function (match)
+				{
+					var spaces = []
+					
+					for (var i=0; i<match.length; i++)
+					{
+						spaces.push(i % 2 == 0 ? '\u0020' : '\u00A0')
+					}
+					
+					return spaces.join("")
+				})
+				.replace(/\s$/, '\u00A0')
 	}
 })

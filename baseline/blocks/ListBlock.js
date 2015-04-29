@@ -1,56 +1,39 @@
 "use strict"
 
-var Model = require('../Model'),
-	TextRegion = require('../regions/TextRegion'),
-	h = require('virtual-dom/h')
+var h = require('virtual-dom/h'),
+	List = require('../List'),
+	Model = require('../Model'),
+	Block = require('./Block'),
+	TextRegion = require('./TextRegion')
 
-module.exports = Model(
+var ListBlock = Model.extend(Block,
 {
-	list_tag: 'ul',
-	item_tag: 'li',
-	text_regions: [],
-	
-	regions: function ()
-	{
-		return this.text_regions
-	},
+	list_tag: 'UL',
+	item_tag: 'LI',
+	regions: List([ new TextRegion() ]),
 	
 	render: function ()
 	{
 		var item_tag = this.item_tag
-			
-		return h(this.list_tag, this.text_regions.map(function (t)
-		{
-			return h(item_tag, t.render())
-		}))
-	},
-	
-	insert: function (index, region)
-	{
-		return this.update(
-		{
-			text_regions: this.text_regions
-							.slice(0, index)
-							.concat([region])
-							.concat(this.text_regions.slice(index))
-		})
-	},
-	
-	replace: function (index, region)
-	{
-		return this.update(
-		{
-			text_regions: this.text_regions.slice(0, index)
-							.concat([region])
-							.concat(this.text_regions.slice(index+1))
-		})
-	},
-	
-	remove: function (index)
-	{
-		return this.update(
-		{
-			text_regions: this.text_regions.slice(0, index).concat(this.text_regions.slice(index+1))
-		})
+		return h(
+			this.list_tag, 
+			this.regions.map(function (region)
+			{
+				return h(item_tag, region.text == '' ? [ h('br') ] : region.render())
+			})
+		)
 	}
 })
+
+ListBlock.recognize = function (vnode)
+{
+	if (vnode.tagName == 'UL' || vnode.tagName == 'OL')
+	{
+		return new ListBlock({
+			list_tag: vnode.tagName,
+			regions: List(vnode.children.map(this.parse_region.bind(this)))
+		})
+	}
+}
+
+module.exports = ListBlock
