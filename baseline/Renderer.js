@@ -6,12 +6,12 @@ var vtree_diff = require('virtual-dom/diff'),
 	h = require('virtual-dom/h')
 
 
-var VersionCheckThunk = function (block)
+var BlockThunk = function (block)
 {
 	this.block = block
 }
-VersionCheckThunk.prototype.type = 'Thunk'
-VersionCheckThunk.prototype.render = function (previous)
+BlockThunk.prototype.type = 'Thunk'
+BlockThunk.prototype.render = function (previous)
 {
 	if (previous && previous.vnode && 
 		previous.block === this.block)
@@ -20,10 +20,7 @@ VersionCheckThunk.prototype.render = function (previous)
 	}
 	else
 	{
-		var vnode = this.block.render()
-		vnode.properties['data-id'] = this.block._id
-		vnode.properties['data-version'] = this.block._version
-		return vnode
+		return this.block.render()
 	}
 }
 
@@ -43,7 +40,7 @@ Renderer.prototype.render = function (blocks)
 {
 	if (this.tree)
 	{
-		var new_tree = h('div', blocks.map(function (x) { return new VersionCheckThunk(x) })),
+		var new_tree = h('div', blocks.map(function (x) { return new BlockThunk(x) })),
 			patches = this.vtree_diff(this.tree, new_tree)
 		
 		this.vdom_patch(this.container, patches)
