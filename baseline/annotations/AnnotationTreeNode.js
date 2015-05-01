@@ -2,180 +2,143 @@
 
 var Model = require('../Model')
 
+// Alright, here's the rules...
+// 2. The root node MUST NOT have an annotation, all other nodes 
+//    MUST have an annotation
+// 1. A node may have zero or more children
+// 2. The span of a child must completely overlap the span of its parent
+// 3. Nodes may be siblings or children but not parents of nodes 
+//    with annotations that have higher precedence (lower rank)
+// 4. Siblings with contiguous spans that have the same type, 
+//    attributes and styles are not allowed
+// 5. Children that have the same type, attributes and styles as
+//    their parents are not allowed.
 module.exports = Model(
 {
 	annotation: null,
 	children: [],
 	
-	/*
-	 * Inserts an annotation into this tree. Annotations are kept in sorted order. 
-	 * Overlapping annotations are split to enforce non-overlapping. Annotations may contain
-	 * other annotations but they may not partially overlap.
-	 */
+	// Insert a new node
 	insert: function (node)
 	{
+		if (!node.annotation)
+		{
+			throw new Error('Attempting to insert a node without an annotation. Only the root node may not have an annotation.')
+		}
+		
 		if (this.children.length == 0)
 		{
-			return this.update({ children: [node] })
+			return this.update({ children: [ node ] })
 		}
 		else
 		{
 			var new_children = [],
-				found_home = false
+				current_node = node
 			
 			for (var i=0; i<this.children.length; i++)
 			{
 				var child = this.children[i]
 				
-				// If the new node is before a child, insert it and we're done
-				if (node.annotation.end() < child.annotation.offset)
+				if ((current_node.annotation.end() == child.annotation.offset ||
+					current_node.annotation.offset == child.annotation.end()) &&
+					current_node.is_similar(child))
 				{
-					new_children.push(node)
-					new_children.push(child)
-					found_home = true
-					break
+					current_node = current_node.merge(child)
 				}
-				// If the end of the new node is adjacent to the beginning
-				// of the child and they are similar, then merge them
-				else if (node.annotation.end() == child.annotation.offset &&
-							node.annotation.is_similar(child.annotation))
+				// If the new node ends before the current child starts, we can 
+				// insert the new node here and leave the rest of the children alone
+				else if (current_node.annotation.end() <= child.annotation.offset)
 				{
-					node.merge(child)
-					new_children.push(node)
-					found_home = true
-					break
-				}
-				// If the new node overlaps the child, resolve the overlap
-				// and continue to loop, checking for more overlap/adjacency conditions
-				else if (node.annotation.overlaps(child.annotation))
-				{
-					var nodes = this.resolve_overlap(node, child)
-					if (nodes.length > 1)
+					new_children.push(current_node)
+					return this.update(
 					{
-						new_children = new_children.concat(nodes.slice(0,nodes.length-1))
-					}
-					node = nodes[nodes.length-1]
-					continue
+						children: new_children.concat(this.children.slice(i))
+					})
 				}
-				// If the end of the child is adjacent to the beginning
-				// of the new node and they are similar, then merge them
-				else if (child.annotation.end() == node.annotation.offset &&
-							node.annotation.is_similar(child.annotation))
+				// If the new node starts after the current child ends, keep going
+				else if (child.annotation.end() <= current_node.annotation.offset)
 				{
-					child.merge(node)
 					new_children.push(child)
-					found_home = true
-					break
 				}
+				// If they are overlapping and similar, merge them into one
+				else if (child.is_similar(current_node))
+				{
+					current_node = current_node.merge(child)
+				}
+				// Otherwise they are different, overlapping annotations that must 
+				// be resolved into a hierarchy
 				else
 				{
-					new_children.push(child)
+					// First we sort by rank
+					var a, b
+					
+					if (child.annotation.type.rank <= current_node.annotation.type.rank)
+					{
+						a = child
+						b = current_node
+					}
+					else
+					{
+						a = current_node
+						b = child
+					}
+					
+					// If a, the higher precedence node, fully contains b,
+					// then b can be inserted into a
+					if (a.annotation.contains(b.annotation))
+					{
+						current_node = a.insert(b)
+					}
+					// Otherwise b must be split into multiple nodes so that the part
+					// that overlaps a can be inserted into a
+					else
+					{
+						var children = a.resolve_overlap(b)
+						new_children = new_children.concat(children.slice(0, children.length-1))
+						current_node = children[children.length-1]
+					}
 				}
 			}
 			
-			if (!found_home)
-			{
-				new_children.push(node)
-			}
-			
-			return this.update({
-				children: new_children.concat(this.children.slice(i+1))
-			})
+			new_children.push(current_node)
+			return this.update({ children: new_children })
 		}
 	},
 	
-	concat: function (nodes)
+	resolve_overlap: function (other)
 	{
-		var cur = this
-		nodes.forEach(function (n)
+		// assert(this.overlaps(other) && !this.contains(other))
+		
+		//   0123456789ABCDE
+		//   xxxxxxxxxxxxxxx
+		// A    |----|
+		// B      |------|
+		// 
+		// A(3,9)
+		// B(5,13)
+		// ---
+		// A(3,9)
+		//     B(5,9)
+		// B(9,13)
+		
+		if (this.annotation.offset < other.annotation.offset)
 		{
-			cur = cur.insert(n)
-		})
-		return cur
-	},
-	
-	resolve_overlap: function (a, b)
-	{
-		if (a.annotation.type.compare_precedence(b.annotation.type) < 0)
-		{
-			return this.resolve_enclosing_overlap(a, b)
+			return [
+				this.insert(
+					other.truncate(this.annotation.offset, this.annotation.end())
+				),
+				other.truncate(this.annotation.end(), other.annotation.end())
+			]
 		}
-		else if (b.annotation.type.compare_precedence(a.annotation.type) < 0)
+		else if (other.annotation.offset < this.annotation.offset)
 		{
-			return this.resolve_enclosing_overlap(b, a)
-		}
-		else if (a.annotation.equals(b.annotation, ['type', 'attrs', 'style']))
-		{
-			return [ a.merge(b) ]
-		}
-		else
-		{
-			return this.resolve_enclosing_overlap(a, b)
-		}
-	},
-	
-	resolve_enclosing_overlap: function (a, b)
-	{
-		// If a completely contains b then add b to a's children...
-		if (a.annotation.contains(b.annotation))
-		{
-			return [ a.insert(b) ]
-		}
-		// ...otherwise split b up into an overlapping node and one or more 
-		// non-overlapping nodes and add the overlapping node to a's children.
-		else
-		{
-			var nodes = []
-			
-			if (b.annotation.offset < a.annotation.offset)
-			{
-				nodes.push(
-					b.union(b.annotation.offset, a.annotation.offset - b.annotation.offset)
+			return [
+				other.truncate(other.annotation.offset, this.annotation.offset),
+				this.insert(
+					other.truncate(this.annotation.offset, other.annotation.end())
 				)
-			}
-			
-			var end = Math.min(a.annotation.end(), b.annotation.end())
-			if (end > a.annotation.offset)
-			{
-				a = a.insert(
-					b.union(
-						a.annotation.offset,
-						end - a.annotation.offset
-					)
-				)
-			}
-			
-			nodes.push(a)
-			
-			if (b.annotation.end() > a.annotation.end())
-			{
-				nodes.push(
-					b.union(
-						a.annotation.end(),
-						b.annotation.end()
-					)
-				)
-			}
-			
-			return nodes
+			]
 		}
-	},
-	
-	union: function (offset, length)
-	{
-		return this.update(
-		{
-			annotation: this.annotation ? this.annotation.union(offset, length) : null,
-			children: this.children
-						.filter(function (child)
-						{
-							return child.overlaps(offset, length)
-						})
-						.map(function (child)
-						{
-							return child.union(offset, length)
-						})
-		})
 	},
 	
 	merge: function (other)
@@ -211,6 +174,47 @@ module.exports = Model(
 		{
 			return node
 		}
+	},
+	
+	truncate: function (offset, end)
+	{
+		// assert(this.overlaps(offset, end))
+		
+		var length = end - offset
+		
+		return this.update(
+		{
+			annotation: this.annotation.union(offset, length),
+			children: this.children
+						.filter(function (child)
+						{
+							return child.annotation.overlaps(offset, length)
+						})
+						.map(function (child)
+						{
+							return child.truncate(offset, end)
+						})
+		})
+	},
+	
+	is_similar: function (other)
+	{
+		if (!this.annotation || !other.annotation)
+		{
+			return false
+		}
+		
+		return this.annotation.equals(other.annotation, ['type', 'attrs', 'styles'])
+	},
+	
+	concat: function (nodes)
+	{
+		var cur = this
+		nodes.forEach(function (n)
+		{
+			cur = cur.insert(n)
+		})
+		return cur
 	},
 	
 	annotations: function ()

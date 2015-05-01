@@ -101,7 +101,7 @@ Parser.prototype.parse_region = function (vnode)
 		
 		return new TextRegion({
 			text: context.text,
-			annotations: context.annotations.length > 0 ? (new AnnotationTree()).concat(context.annotations) : new AnnotationTree()
+			annotations: context.annotations.length > 0 ? (new AnnotationTree()).concat(context.annotations.reverse()) : new AnnotationTree()
 		})
 	}
 }

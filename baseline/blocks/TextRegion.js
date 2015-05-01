@@ -101,5 +101,33 @@ module.exports = Model(
 					return spaces.join("")
 				})
 				.replace(/\s$/, '\u00A0')
+	},
+	
+	get_offset_of_dom_point: function (root_node, dom_point)
+	{
+		// assert(dom_point inside this region)
+		
+		var offset = 0,
+			children = Array.prototype.slice.apply(root_node.childNodes)
+		
+		for (var i=0; i<children.length; i++)
+		{
+			var child = children[i]
+			
+			if (child == dom_point.node)
+			{
+				return offset + dom_point.offset
+			}
+			else if (child.nodeType == 3) // TEXT_NODE
+			{
+				offset += child.nodeValue.length
+			}
+			else
+			{
+				offset += this.get_offset_of_dom_point(child, dom_point)
+			}
+		}
+		
+		return offset
 	}
 })

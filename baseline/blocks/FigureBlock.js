@@ -18,7 +18,10 @@ var FigureBlock = Model.extend(Block,
 	{
 		return h(
 			'figure', 
-			{ className: this.selected ? 'selected' : '' },
+			{
+				contentEditable: false,
+				className: this.selected ? 'selected' : ''
+			},
 			[
 				h('img', {
 					src: this.src,

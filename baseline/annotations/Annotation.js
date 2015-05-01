@@ -19,8 +19,8 @@ module.exports = Model(
 	overlaps: function (offset_or_annotaton, length)
 	{
 		var range = this._get_range(offset_or_annotaton, length)
-		return (this.offset <= range.end && this.end() >= range.offset) ||
-				(range.offset <= this.end() && range.end >= this.offset)
+		return (this.offset < range.end && this.end() > range.offset) ||
+				(range.offset < this.end() && range.end > this.offset)
 	},
 	
 	contains: function (offset_or_annotaton, length)

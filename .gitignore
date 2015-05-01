@@ -98,3 +98,6 @@ sitemap.xml
 
 # Coverage reports
 coverage/
+
+# File for temporary inspection
+debug.js

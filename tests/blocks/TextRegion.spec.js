@@ -58,8 +58,8 @@ describe('blocks.TextRegion', function ()
 	
 	it('renders nested and non-adjacent annotations correctly', function ()
 	{
-		var bold = new AnnotationType({ tag: 'b', precedence: 0 }),
-			italic = new AnnotationType({ tag: 'i', precedence: 1 }),
+		var bold = new AnnotationType({ tag: 'b', rank: 0 }),
+			italic = new AnnotationType({ tag: 'i', rank: 1 }),
 			text = new TextRegion(
 			{
 				text: 'foo bar baz',
@@ -95,5 +95,105 @@ describe('blocks.TextRegion', function ()
 		expect(result[3].tagName).to.equal('B')
 		expect(result[3].children.length).to.equal(1)
 		expect(result[3].children[0].text).to.equal('az')
+	})
+
+	it('returns correct offset for a node with a single child', function ()
+	{
+		var region = new TextRegion(),
+			root_node = { childNodes: [ {} ] },
+			dom_point = { node: root_node.childNodes[0], offset: 11 },
+			offset = region.get_offset_of_dom_point(root_node, dom_point)
+		
+		expect(offset).to.equal(11)
+	})
+	
+	it('returns correct offset for a node with nested children', function ()
+	{
+		var region = new TextRegion(),
+			root_node = {
+				childNodes: [
+					{
+						nodeType: 1,
+						childNodes: [
+							{}
+						]
+					}
+				]
+			},
+			dom_point = { node: root_node.childNodes[0].childNodes[0], offset: 5 },
+			offset = region.get_offset_of_dom_point(root_node, dom_point)
+		
+		expect(offset).to.equal(5)
+	})
+	
+	it('returns correct offset when there are multiple children', function ()
+	{
+		var region = new TextRegion(),
+			root_node = {
+				childNodes: [
+					{
+						nodeType: 3,
+						nodeValue: 'foo'
+					},
+					{
+						nodeType: 3,
+						nodeValue: 'bar'
+					},
+					{
+						nodeType: 1,
+						childNodes: [
+							{
+								nodeType: 3,
+								nodeValue: 'baz'
+							},
+							{}
+						]
+					}
+				]
+			},
+			dom_point = { node: root_node.childNodes[2].childNodes[1], offset: 5 },
+			offset = region.get_offset_of_dom_point(root_node, dom_point)
+		
+		expect(offset).to.equal(14)
+	})
+	
+	it('returns correct offset when there are multiple children and deep nesting', function ()
+	{
+		var region = new TextRegion(),
+			root_node = {
+				childNodes: [
+					{
+						nodeType: 3,
+						nodeValue: 'foo'
+					},
+					{
+						nodeType: 3,
+						nodeValue: 'bar'
+					},
+					{
+						nodeType: 1,
+						childNodes: [
+							{
+								nodeType: 3,
+								nodeValue: 'baz'
+							},
+							{
+								nodeType: 1,
+								childNodes: [
+									{
+										nodeType: 3,
+										nodeValue: 'qux'
+									},
+									{}
+								]
+							}
+						]
+					}
+				]
+			},
+			dom_point = { node: root_node.childNodes[2].childNodes[1].childNodes[1], offset: 5 },
+			offset = region.get_offset_of_dom_point(root_node, dom_point)
+		
+		expect(offset).to.equal(17)
 	})
 })

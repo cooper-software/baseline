@@ -167,12 +167,12 @@ describe('Parser', function ()
 		expect(anns[0].length).to.equal(3)
 	})
 	
-	it('adjust annotations to match precedence when parsing', function ()
+	it('adjust annotations to match rank when parsing', function ()
 	{
 		var parser = new Parser({
 				annotation_types: [
-					new AnnotationType({ tag: 'FOO', precedence: 0 }),
-					new AnnotationType({ tag: 'BAR', precedence: 10 })
+					new AnnotationType({ tag: 'FOO', rank: 0 }),
+					new AnnotationType({ tag: 'BAR', rank: 10 })
 				]
 			}),
 			result = parser.parse_html('<div><p>Foo bar <bar>baz <foo>qux</foo></bar></p></div>')

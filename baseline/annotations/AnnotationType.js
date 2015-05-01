@@ -3,7 +3,7 @@
 /**
  * Describes an annotation in terms of it's tag, allowed element and style attributes.
  * Precendence determines which annotations contain other annotations. For example, if 
- * an annotation with type FOO that has a precedence of 1 and one with type BAR that 
+ * an annotation with type FOO that has a rank of 1 and one with type BAR that 
  * has a precendence of 100 are overlapping, then BAR may be split during render in order
  * to create a DOM (or other) tree. Here is a visualization:
  * 
@@ -20,14 +20,14 @@ var Model = require('../Model')
 
 module.exports = Model(
 {
-	precedence: 1000,
+	rank: 1000,
 	tag: 'SPAN',
 	tag_aliases: new Set([]),
 	attrs: new Set([]),
 	styles: new Set([]),
 	
-	compare_precedence: function (other)
+	compare_rank: function (other)
 	{
-		return this.precedence - other.precedence
+		return this.rank - other.rank
 	}
 })
