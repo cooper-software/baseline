@@ -2,12 +2,17 @@
 
 var expect = require('chai').expect,
 	h = require('virtual-dom/h'),
+	window = require('jsdom').jsdom().defaultView,
+	document = window.document,
 	Model = require('../../baseline/Model'),
 	List = require('../../baseline/List'),
 	Block = require('../../baseline/blocks/Block'),
 	ListBlock = require('../../baseline/blocks/ListBlock'),
 	TextRegion = require('../../baseline/blocks/TextRegion'),
-	Parser = require('../../baseline/Parser')
+	Parser = require('../../baseline/Parser'),
+	DomPoint = require('../../baseline/selection/DomPoint'),
+	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
+	Annotation = require('../../baseline/annotations/Annotation')
 
 
 describe('blocks.ListBlock', function ()
@@ -114,5 +119,51 @@ describe('blocks.ListBlock', function ()
 		expect(block.regions.length).to.equal(2)
 		expect(block.regions[0].text).to.equal('foo')
 		expect(block.regions[1].text).to.equal('bar')
+	})
+	
+	it('provides a position for a dom point that points at its list node', function ()
+	{
+		var block = new ListBlock(),
+			node = document.createElement('ul')
+		
+		var pos = block.get_position_of_dom_point(node, new DomPoint({ node: node, offset: 123 }))
+		expect(pos).to.deep.equal({ region: 0, offset: 0 })
+	})
+	
+	it('can find the position of a dom point in a region without annotations', function ()
+	{
+		var block = new ListBlock({
+				regions: [
+					new TextRegion({ text: 'Foo' }),
+					new TextRegion({ text: 'Bar' })
+				]
+			}),
+			node = document.createElement('ul')
+		
+		node.innerHTML = '<li>Foo</li><li>Bar</li>'
+		
+		var pos = block.get_position_of_dom_point(node, new DomPoint({ node: node.childNodes[1], offset: 1 }))
+		expect(pos).to.deep.equal({ region: 1, offset: 1 })
+	})
+	
+	it('can find the position of a dom point in a region with annotations', function ()
+	{
+		var block = new ListBlock({
+				regions: [
+					new TextRegion({ text: 'Foo' }),
+					new TextRegion({
+						text: 'Bar',
+						annotations: (new AnnotationTree()).concat([
+							new Annotation({ offset: 1, length: 2 })
+						])
+					})
+				]
+			}),
+			node = document.createElement('ul')
+		
+		node.innerHTML = '<li>Foo</li><li>B<span>ar</span></li>'
+		
+		var pos = block.get_position_of_dom_point(node, new DomPoint({ node: node.childNodes[1].childNodes[1], offset: 1 }))
+		expect(pos).to.deep.equal({ region: 1, offset: 2 })
 	})
 })
