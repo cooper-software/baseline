@@ -204,4 +204,16 @@ Model.is_instance = function (inst, model)
 	return false
 }
 
+Model.mutable_copy = function (inst)
+{
+	var mutable_inst = {}
+	
+	Object.keys(inst).forEach(function (k)
+	{
+		mutable_inst[k] = inst[k]
+	})
+	
+	return mutable_inst
+}
+
 module.exports = Model

@@ -1,10 +1,14 @@
 "use strict"
 
 var expect = require("chai").expect,
+	window = require('jsdom').jsdom().defaultView,
+	document = window.document,
 	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType'),
-	TextRegion = require('../../baseline/blocks/TextRegion')
+	TextRegion = require('../../baseline/blocks/TextRegion'),
+	Point = require('../../baseline/selection/Point'),
+	DomPoint = require('../../baseline/selection/DomPoint')
 	
 describe('blocks.TextRegion', function ()
 {
@@ -195,5 +199,57 @@ describe('blocks.TextRegion', function ()
 			offset = region.get_offset_of_dom_point(root_node, dom_point)
 		
 		expect(offset).to.equal(17)
+	})
+	
+	it('can find the DomPoint for a Point when it has no annotations', function ()
+	{
+		var region = new TextRegion({ text: 'Foo bar baz' }),
+			point = new Point({ offset: 3 }),
+			node = document.createElement('p')
+		
+		node.appendChild(document.createTextNode('Foo bar baz'))
+		var dom_point = region.get_dom_point(node, point)
+		expect(dom_point.node).to.equal(node.childNodes[0])
+		expect(dom_point.offset).to.equal(3)
+	})
+	
+	it('can find the DomPoint for a point when there are annotations', function ()
+	{
+		var ann_type = new AnnotationType({ tag: 'z' }),
+			region = new TextRegion({
+				text: 'Foo bar baz',
+				annotations: (new AnnotationTree()).concat([
+					new Annotation({ offset: 4, length: 3, type: ann_type }),
+					new Annotation({ offset: 8, length: 3, type: ann_type })
+				])
+			}),
+			point = new Point({ offset: 1 }),
+			node = document.createElement('p')
+		
+		node.innerHTML = 'Foo <z>bar</z> <z>baz</z>'
+		
+		var dom_point = region.get_dom_point(node, point)
+		expect(dom_point.node).to.equal(node.childNodes[0])
+		expect(dom_point.offset).to.equal(1)
+	})
+	
+	it('can find the DomPoint for a point when it is inside an annotation', function ()
+	{
+		var ann_type = new AnnotationType({ tag: 'z' }),
+			region = new TextRegion({
+				text: 'Foo bar baz qux',
+				annotations: (new AnnotationTree()).concat([
+					new Annotation({ offset: 4, length: 3, type: ann_type }),
+					new Annotation({ offset: 8, length: 3, type: ann_type })
+				])
+			}),
+			point = new Point({ offset: 10 }),
+			node = document.createElement('p')
+		
+		node.innerHTML = 'Foo <z>bar</z> <z>baz</z> qux'
+		var dom_point = region.get_dom_point(node, point)
+		expect(dom_point.node.nodeName).to.equal('#text')
+		expect(dom_point.node.nodeValue).to.equal('baz')
+		expect(dom_point.offset).to.equal(2)
 	})
 })

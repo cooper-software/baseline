@@ -2,7 +2,8 @@
 
 var h = require('virtual-dom/h'),
 	Model = require('../Model'),
-	AnnotationTree = require('../annotations/AnnotationTree')
+	AnnotationTree = require('../annotations/AnnotationTree'),
+	DomPoint = require('../selection/DomPoint')
 
 module.exports = Model(
 {
@@ -129,5 +130,66 @@ module.exports = Model(
 		}
 		
 		return offset
+	},
+	
+	get_dom_point: function (root_node, point)
+	{
+		if (this.annotations.empty())
+		{
+			return new DomPoint({
+				node: root_node.firstChild,
+				offset: point.offset
+			})
+		}
+		else
+		{
+			return this._get_dom_point(root_node, point.offset)
+		}
+	},
+	
+	_get_dom_point: function (node, offset)
+	{
+		var children = Array.prototype.slice.call(node.childNodes)
+		
+		if (children.length > 0)
+		{
+			for (var i=0; i<children.length; i++)
+			{
+				var child_node = children[i]
+				if (child_node.nodeType == 3) // TEXT_NODE
+				{
+					if (child_node.nodeValue.length >= offset)
+					{
+						return new DomPoint({
+							node: child_node,
+							offset: offset
+						})
+					}
+					else
+					{
+						offset -= child_node.nodeValue.length
+					}
+				}
+				else
+				{
+					var match = this._get_dom_point(child_node, offset)
+					if (match)
+					{
+						return match
+					}
+					else
+					{
+						offset -= child_node.textContent.length
+					}
+				}
+			}
+		}
+		else
+		{
+			return new DomPoint({
+				node: node,
+				offset: offset
+			})
+		}
 	}
 })

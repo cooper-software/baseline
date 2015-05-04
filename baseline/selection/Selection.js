@@ -10,7 +10,7 @@ var Selection = Model(
 	range: new Range()
 })
 
-Selection.from_dom = function (window, doc)
+Selection.from_dom = function (window, doc, container)
 {
 	var selection = window.getSelection()
 	
@@ -49,6 +49,10 @@ Selection.from_dom = function (window, doc)
 	}
 }
 
+Selection.to_dom = function (container, selection)
+{
+	
+}
 
 var is_inside_doc = function (container, node)
 {

@@ -188,4 +188,27 @@ describe("Model", function ()
 		expect(Bar._id).to.be.defined
 		expect(Bar._version).to.be.defined
 	})
+	
+	it('is immutable', function ()
+	{
+		var Foo = new Model({ things: 'stuff' }),
+			foo = new Foo(),
+			bad = function ()
+			{
+				foo.things = 'other stuff'
+			}
+		
+		expect(bad).to.throw(TypeError, "Cannot assign to read only property 'things' of [object Object]")
+	})
+	
+	it('can make an immutable copy', function ()
+	{
+		var Foo = new Model({ things: 'stuff', do_things: function () { return 'do ' + this.things } }),
+			foo = new Foo(),
+			mutable_foo = Model.mutable_copy(foo)
+		
+		expect(Object.keys(mutable_foo)).to.deep.equal(['things', 'do_things', 'update', 'equals'])
+		mutable_foo.things = 'other stuff'
+		expect(mutable_foo.do_things()).to.equal('do other stuff')
+	})
 })

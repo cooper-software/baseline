@@ -4,7 +4,8 @@ var chai = require('chai'),
 	expect = chai.expect,
 	sinon = require('sinon'),
 	sinon_chai = require('sinon-chai'),
-	document = require('min-document'),
+	window = require('jsdom').jsdom().defaultView,
+	document = window.document,
 	Renderer = require('../baseline/Renderer'),
 	vtree_diff = require('virtual-dom/diff'),
 	vdom_patch = require('virtual-dom/patch'),
@@ -71,13 +72,10 @@ describe('Renderer', function ()
 		
 		expect(renderer.vtree_diff).to.have.been.calledOnce
 		expect(renderer.vdom_patch).to.have.been.calledOnce
-		// min-document inserts an empty node when appending a document 
-		// fragment as happens in replace() so we have two children
-		// instead of the expected 1
-		expect(renderer.container.childNodes.length).to.equal(2)
+		expect(renderer.container.childNodes.length).to.equal(1)
 		expect(renderer.container.childNodes)
-		expect(renderer.container.childNodes[1].tagName).to.equal('P')
-		expect(renderer.container.childNodes[1].childNodes.length).to.equal(1)
-		expect(renderer.container.childNodes[1].childNodes[0].data).to.equal('foo')
+		expect(renderer.container.childNodes[0].tagName).to.equal('P')
+		expect(renderer.container.childNodes[0].childNodes.length).to.equal(1)
+		expect(renderer.container.childNodes[0].childNodes[0].data).to.equal('foo')
 	})
 })

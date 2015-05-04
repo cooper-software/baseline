@@ -23,5 +23,10 @@ module.exports = Model.extend(Block,
 			region: 0,
 			offset: this.regions[0].get_offset_of_dom_point(block_node, dom_point)
 		}
+	},
+	
+	get_dom_point: function (block_node, point)
+	{
+		return this.regions[0].get_dom_point(block_node, point)
 	}
 })
