@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('../Model')
+var Model = require('mchammer').Model
 
 // Alright, here's the rules...
 // 2. The root node MUST NOT have an annotation, all other nodes 

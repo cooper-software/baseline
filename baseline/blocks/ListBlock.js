@@ -2,7 +2,7 @@
 
 var h = require('virtual-dom/h'),
 	List = require('../List'),
-	Model = require('../Model'),
+	Model = require('mchammer').Model,
 	Block = require('./Block'),
 	TextRegion = require('./TextRegion')
 

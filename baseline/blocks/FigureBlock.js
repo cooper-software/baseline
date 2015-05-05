@@ -1,7 +1,7 @@
 "use strict"
 
 var h = require('virtual-dom/h'),
-	Model = require('../Model'),
+	Model = require('mchammer').Model,
 	Block = require('./Block')
 
 var FigureBlock = Model.extend(Block,

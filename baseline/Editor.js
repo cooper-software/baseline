@@ -11,9 +11,9 @@ var Editor = function Editor(options)
 {
 	this.container = options.container
 	this.container.contentEditable = true
-	this.container.addEventListener('keydown', this.keydown.bind(this))
-	this.container.addEventListener('keyup', this.keyup.bind(this))
-	this.container.addEventListener('keypress', this.keypress.bind(this))
+	this.container.addEventListener('keydown', this.onkeydown.bind(this))
+	this.container.addEventListener('keyup', this.onkeyup.bind(this))
+	this.container.addEventListener('keypress', this.onkeypress.bind(this))
 	this.document = new Document()
 	this.document_stack = []
 	this.parser = new Parser({
@@ -37,6 +37,21 @@ Editor.prototype.update_from_presentation = function ()
 	{
 		blocks: this.parser.parse_html('<div>'+this.container.innerHTML+'</div>')
 	})
+}
+
+Editor.prototype.onkeydown = function (e)
+{
+	
+}
+
+Editor.prototype.onkeyup = function (e)
+{
+	this.update_from_presentation()
+}
+
+Editor.prototype.onkeypress = function (e)
+{
+	
 }
 
 /*

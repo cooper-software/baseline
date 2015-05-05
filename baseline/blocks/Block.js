@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('../Model'),
+var Model = require('mchammer').Model,
 	DomPoint = require('../selection/DomPoint')
 
 module.exports = Model(
@@ -33,4 +33,4 @@ module.exports = Model(
 			offset: 0
 		})
 	}
-})
+}, true)

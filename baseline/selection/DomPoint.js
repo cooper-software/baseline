@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('../Model')
+var Model = require('mchammer').Model
 
 module.exports = Model(
 {

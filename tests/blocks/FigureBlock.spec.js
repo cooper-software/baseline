@@ -1,7 +1,7 @@
 "use strict"
 
 var expect = require('chai').expect,
-	Model = require('../../baseline/Model'),
+	Model = require('mchammer').Model,
 	Block = require('../../baseline/blocks/Block'),
 	FigureBlock = require('../../baseline/blocks/FigureBlock'),
 	h = require('virtual-dom/h')
