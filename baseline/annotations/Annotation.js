@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('mchammer').Model,
+var Model = require('../Model'),
 	AnnotationType = require('./AnnotationType')
 
 module.exports = Model(

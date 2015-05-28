@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('mchammer').Model,
+var Model = require('./Model'),
 	List = require('./List')
 
 module.exports = Model(

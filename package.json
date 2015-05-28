@@ -12,11 +12,7 @@
   },
   "author": "Elisha Fitch-Cook <elisha@cooper.com>",
   "license": "MIT",
-  "dependencies": {
-    "mchammer": "^1.0.1",
-    "virtual-dom": "^2.0.1",
-    "virtual-html": "^1.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "browserify": "^9.0.8",
     "chai": "^2.2.0",

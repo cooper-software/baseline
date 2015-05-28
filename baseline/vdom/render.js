@@ -1,20 +1,35 @@
 "use strict"
 
+var model = require('./model'),
+	VirtualText = model.VirtualText,
+	Thunk = model.Thunk
+	
+
 function render(document, vnode)
 {
-	if (vnode.element)
+	if (vnode.render)
+	{
+		vnode = vnode.render(document)
+	}
+	
+	if (vnode.dom_node)
 	{
 		return vnode
 	}
 	
-	var element = document.createElement(vnode.tag)
-	set_properties(element, vnode.properties)
-	
-	return vnode.update(
+	if (vnode.constructor == VirtualText)
 	{
-		element: element,
-		children: set_children(document, element, vnode.children)
-	})
+		vnode.dom_node = document.createTextNode(vnode.text)
+	}
+	else
+	{
+		var element = document.createElement(vnode.tag)
+		set_properties(element, vnode.properties)
+		set_children(document, element, vnode.children)
+		vnode.dom_node = element
+	}
+	
+	return vnode
 }
 
 function set_properties (element, properties)
@@ -26,7 +41,7 @@ function set_properties (element, properties)
 			element.setAttribute(k, properties.attributes[k])
 		})
 		
-		delete properties.attributes
+		properties.attributes
 	}
 	
 	if (properties.style)
@@ -36,12 +51,15 @@ function set_properties (element, properties)
 			element.style[k] = properties.style[k]
 		})
 		
-		delete properties.style
+		properties.style
 	}
 	
 	Object.keys(properties).forEach(function (k)
 	{
-		element[k] = properties[k]
+		if (k != 'attributes' && k != 'style')
+		{
+			element[k] = properties[k]
+		}
 	})
 }
 
@@ -49,32 +67,24 @@ function set_children(document, element, children)
 {
 	if (children.length < 1)
 	{
-		return children
+		return
 	}
 	
-	var new_children = [],
-		frag = document.createDocumentFragment()
-		
 	children.forEach(function (child)
 	{
-		if (child.constructor == String)
+		if (child.constructor == VirtualText)
 		{
-			frag.appendChild(
-				document.createTextNode(child)
+			child.dom_node = document.createTextNode(child.text)
+			element.appendChild(
+				child.dom_node
 			)
-			
-			new_children.push(child)
 		}
 		else
 		{
-			var new_child = render(document, child)
-			frag.appendChild(new_child.element)
-			new_children.push(new_child)
+			render(document, child)
+			element.appendChild(child.dom_node)
 		}
 	})
-	
-	element.appendChild(frag)
-	return new_children
 }
 
 module.exports = render

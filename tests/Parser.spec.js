@@ -1,6 +1,8 @@
 "use strict"
 
 var expect = require('chai').expect,
+	window = require('jsdom').jsdom().defaultView,
+	document = window.document,
 	Parser = require('../baseline/Parser'),
 	AnnotationType = require('../baseline/annotations/AnnotationType')
 	
@@ -18,7 +20,7 @@ describe('Parser', function ()
 	it('won\'t parse text outside of a block', function ()
 	{
 		var parser = new Parser(),
-			result = parser.parse_html('sdfgsdfg sdfg')
+			result = parser.parse_html(document, 'sdfgsdfg sdfg')
 		
 		expect(result).to.deep.equal([])
 	})
@@ -26,7 +28,7 @@ describe('Parser', function ()
 	it('will parse all blocks in its allowed list', function ()
 	{
 		var parser = new Parser(),
-			result = parser.parse_html(
+			result = parser.parse_html(document, 
 				'<div>'+
 					'<p>A</p>'+
 					'<h1>B</h1>'+
@@ -36,7 +38,6 @@ describe('Parser', function ()
 					'<blockquote>F</blockquote>'+
 				'</div>'
 			)
-		
 		expect(result.length).to.equal(6)
 		expect(result[0].tag).to.equal('P')
 		expect(result[0].regions.length).to.equal(1)
@@ -67,7 +68,7 @@ describe('Parser', function ()
 	it('won\'t parse a block that isn\'t allowed', function ()
 	{
 		var parser = new Parser(),
-			result = parser.parse_html(
+			result = parser.parse_html(document, 
 				'<div>'+
 					'<p>A</p>'+
 					'<foo>B</foo>'+
@@ -91,13 +92,13 @@ describe('Parser', function ()
 		var parser = new Parser()
 		parser.block_recognizers.push(function (vnode)
 		{
-			if (vnode.tagName == 'P')
+			if (vnode.tag == 'P')
 			{
 				return 'FOO'
 			}
 		})
 		
-		var result = parser.parse_html('<div><p>foo</p></div>')
+		var result = parser.parse_html(document, '<div><p>foo</p></div>')
 		expect(result).to.deep.equal(['FOO'])
 	})
 	
@@ -110,7 +111,7 @@ describe('Parser', function ()
 			done()
 		})
 		
-		parser.parse_html('<div><p>foo</p></div>')
+		parser.parse_html(document, '<div><p>foo</p></div>')
 	})
 	
 	it('falls back to a simple block when block recognizers don\'t return anything', function ()
@@ -118,7 +119,7 @@ describe('Parser', function ()
 		var parser = new Parser()
 		parser.block_recognizers.push(function (vnode){})
 		
-		var result = parser.parse_html('<div><p>foo</p></div>')
+		var result = parser.parse_html(document, '<div><p>foo</p></div>')
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
 		expect(result[0].regions.length).to.equal(1)
@@ -134,7 +135,7 @@ describe('Parser', function ()
 					function () { return 'two' }
 				]
 			}),
-			result = parser.parse_html('<div><foo></foo></div>')
+			result = parser.parse_html(document, '<div><foo></foo></div>')
 		
 		expect(result).to.deep.equal(['one'])
 	})
@@ -142,7 +143,7 @@ describe('Parser', function ()
 	it('does not parse unrecognized annotations', function ()
 	{
 		var parser = new Parser({ annotation_types: [] }),
-			result = parser.parse_html('<div><p>Foo bar <strong>baz</strong></p></div>')
+			result = parser.parse_html(document, '<div><p>Foo bar <strong>baz</strong></p></div>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
@@ -154,7 +155,7 @@ describe('Parser', function ()
 	it('parses recognized annotations', function ()
 	{
 		var parser = new Parser({ annotation_types: [ new AnnotationType({ tag: 'STRONG' }) ] }),
-			result = parser.parse_html('<div><p>Foo bar <strong>baz</strong></p></div>')
+			result = parser.parse_html(document, '<div><p>Foo bar <strong>baz</strong></p></div>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
@@ -175,7 +176,7 @@ describe('Parser', function ()
 					new AnnotationType({ tag: 'BAR', rank: 10 })
 				]
 			}),
-			result = parser.parse_html('<div><p>Foo bar <bar>baz <foo>qux</foo></bar></p></div>')
+			result = parser.parse_html(document, '<div><p>Foo bar <bar>baz <foo>qux</foo></bar></p></div>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')

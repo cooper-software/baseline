@@ -1,7 +1,7 @@
 "use strict"
 
-var h = require('virtual-dom/h'),
-	Model = require('mchammer').Model,
+var h = require('../vdom').h,
+	Model = require('../Model'),
 	Block = require('./Block'),
 	TextRegion = require('./TextRegion')
 

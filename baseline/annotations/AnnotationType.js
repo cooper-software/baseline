@@ -16,7 +16,7 @@
  * The <FOO>quick brown <BAR>fox</BAR></FOO><BAR> jumps</BAR> over the lazy dog.
  */
 
-var Model = require('mchammer').Model
+var Model = require('../Model')
 
 module.exports = Model(
 {

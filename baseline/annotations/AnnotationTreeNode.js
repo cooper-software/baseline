@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('mchammer').Model
+var Model = require('../Model')
 
 // Alright, here's the rules...
 // 2. The root node MUST NOT have an annotation, all other nodes 
@@ -204,7 +204,7 @@ module.exports = Model(
 			return false
 		}
 		
-		return this.annotation.equals(other.annotation, ['type', 'attrs', 'styles'])
+		return Model.equals(this.annotation, other.annotation, ['type', 'attrs', 'styles'])
 	},
 	
 	concat: function (nodes)

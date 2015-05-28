@@ -1,7 +1,7 @@
 "use strict"
 
-var h = require('virtual-dom/h'),
-	Model = require('mchammer').Model,
+var h = require('../vdom').h,
+	Model = require('../Model'),
 	Block = require('./Block')
 
 var FigureBlock = Model.extend(Block,
@@ -62,7 +62,7 @@ var FigureBlock = Model.extend(Block,
 
 FigureBlock.recognize = function (vnode)
 {
-	if (vnode.tagName != 'FIGURE')
+	if (vnode.tag != 'FIGURE')
 	{
 		return
 	}
@@ -71,7 +71,7 @@ FigureBlock.recognize = function (vnode)
 	
 	vnode.children.forEach(function (child)
 	{
-		if (child.tagName == 'IMG')
+		if (child.tag == 'IMG')
 		{
 			if (props.src)
 			{
@@ -83,11 +83,11 @@ FigureBlock.recognize = function (vnode)
 			props.width = child.properties.width
 			props.height = child.properties.height
 		}
-		else if (child.tagName == 'FIGCAPTION')
+		else if (child.tag == 'FIGCAPTION')
 		{
 			child.children.forEach(function (caption_child)
 			{
-				if (caption_child.tagName && 
+				if (caption_child.tag && 
 					caption_child.children.length > 0)
 				{
 					if (caption_child.properties.className == 'caption')
@@ -105,7 +105,7 @@ FigureBlock.recognize = function (vnode)
 								props.attribution_name = props.attribution_name.substr(3)
 							}
 						}
-						else if (caption_child.children[1].tagName == 'A')
+						else if (caption_child.children[1].tag == 'A')
 						{
 							var attr_child = caption_child.children[1]
 							props.attribution_url = attr_child.properties.href

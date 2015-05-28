@@ -1,7 +1,7 @@
 "use strict"
 
-var h = require('virtual-dom/h'),
-	vdom_from_html = require('virtual-html'),
+var vdom = require('./vdom'),
+	h = vdom.h,
 	SimpleBlock = require('./blocks/SimpleBlock'),
 	TextRegion = require('./blocks/TextRegion'),
 	Annotation = require('./annotations/Annotation'),
@@ -18,9 +18,16 @@ var Parser = function Parser(options)
 	])
 }
 
-Parser.prototype.parse_html = function (html)
+Parser.prototype.parse_html = function (document, html)
 {
-	return this.parse_vtree(vdom_from_html(html))
+	var div = document.createElement('div')
+	div.innerHTML = html
+	return this.parse_dom(div.childNodes[0])
+}
+
+Parser.prototype.parse_dom = function (dom_node)
+{
+	return this.parse_vtree(vdom.parse(dom_node, false))
 }
 
 Parser.prototype.parse_vtree = function (vtree)
@@ -56,7 +63,7 @@ Parser.prototype.parse_vtree = function (vtree)
 
 Parser.prototype.parse_vnode = function (vnode)
 {
-	if (!vnode.tagName)
+	if (!vnode.tag)
 	{
 		return
 	}
@@ -71,10 +78,10 @@ Parser.prototype.parse_vnode = function (vnode)
 		}
 	}
 	
-	if (this.allowed_block_tags.has(vnode.tagName))
+	if (this.allowed_block_tags.has(vnode.tag))
 	{
 		return new SimpleBlock({
-			tag: vnode.tagName,
+			tag: vnode.tag,
 			regions: [ this.parse_region(vnode) ]
 		})
 	}
@@ -125,7 +132,7 @@ Parser.prototype.parse_region_node = function (context, vnode)
 		{
 			var vnode_props = this.parse_region_node_properties(vnode)
 			
-			if (this.region_node_matches_annotation_type(vnode.tagName, vnode_props, this.annotation_types[i]))
+			if (this.region_node_matches_annotation_type(vnode.tag, vnode_props, this.annotation_types[i]))
 			{
 				context.annotations.push(
 					new Annotation({

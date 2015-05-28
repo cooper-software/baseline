@@ -1,10 +1,10 @@
 "use strict"
 
 var expect = require('chai').expect,
-	Model = require('mchammer').Model,
+	Model = require('../../baseline/Model'),
 	Block = require('../../baseline/blocks/Block'),
 	FigureBlock = require('../../baseline/blocks/FigureBlock'),
-	h = require('virtual-dom/h')
+	h = require('../../baseline/vdom').h
 
 describe('blocks.FigureBlock', function ()
 {
@@ -31,9 +31,9 @@ describe('blocks.FigureBlock', function ()
 		var block = new FigureBlock(),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('FIGURE')
+		expect(result.tag).to.equal('FIGURE')
 		expect(result.children.length).to.equal(1)
-		expect(result.children[0].tagName).to.equal('IMG')
+		expect(result.children[0].tag).to.equal('IMG')
 		expect(result.children[0].properties.src).to.equal('')
 		expect(result.children[0].properties.alt).to.equal('')
 		expect(result.children[0].properties.width).to.equal(0)
@@ -53,23 +53,23 @@ describe('blocks.FigureBlock', function ()
 			}),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('FIGURE')
+		expect(result.tag).to.equal('FIGURE')
 		expect(result.children.length).to.equal(2)
-		expect(result.children[0].tagName).to.equal('IMG')
+		expect(result.children[0].tag).to.equal('IMG')
 		expect(result.children[0].properties.src).to.equal('foo')
 		expect(result.children[0].properties.alt).to.equal('bar')
 		expect(result.children[0].properties.width).to.equal(100)
 		expect(result.children[0].properties.height).to.equal(200)
-		expect(result.children[1].tagName).to.equal('FIGCAPTION')
+		expect(result.children[1].tag).to.equal('FIGCAPTION')
 		expect(result.children[1].children.length).to.equal(2)
-		expect(result.children[1].children[0].tagName).to.equal('P')
+		expect(result.children[1].children[0].tag).to.equal('P')
 		expect(result.children[1].children[0].properties.className).to.equal('caption')
 		expect(result.children[1].children[0].children[0].text).to.equal('Stuff and things')
-		expect(result.children[1].children[1].tagName).to.equal('P')
+		expect(result.children[1].children[1].tag).to.equal('P')
 		expect(result.children[1].children[1].properties.className).to.equal('attribution')
 		expect(result.children[1].children[1].children.length).to.equal(2)
 		expect(result.children[1].children[1].children[0].text).to.equal('By ')
-		expect(result.children[1].children[1].children[1].tagName).to.equal('A')
+		expect(result.children[1].children[1].children[1].tag).to.equal('A')
 		expect(result.children[1].children[1].children[1].properties.href).to.equal('http://www.example.com')
 		expect(result.children[1].children[1].children[1].children.length).to.equal(1)
 		expect(result.children[1].children[1].children[1].children[0].text).to.equal('Fozzy Bear')
@@ -80,9 +80,9 @@ describe('blocks.FigureBlock', function ()
 		var block = new FigureBlock({ attribution_name: 'Fozzy Bear' }),
 			result = block.render()
 		
-		expect(result.children[1].tagName).to.equal('FIGCAPTION')
+		expect(result.children[1].tag).to.equal('FIGCAPTION')
 		expect(result.children[1].children.length).to.equal(1)
-		expect(result.children[1].children[0].tagName).to.equal('P')
+		expect(result.children[1].children[0].tag).to.equal('P')
 		expect(result.children[1].children[0].properties.className).to.equal('attribution')
 		expect(result.children[1].children[0].children[0].text).to.equal('By Fozzy Bear')
 	})
@@ -92,13 +92,13 @@ describe('blocks.FigureBlock', function ()
 		var block = new FigureBlock({ attribution_name: 'Fozzy Bear', attribution_url: 'http://www.example.com' }),
 			result = block.render()
 		
-		expect(result.children[1].tagName).to.equal('FIGCAPTION')
+		expect(result.children[1].tag).to.equal('FIGCAPTION')
 		expect(result.children[1].children.length).to.equal(1)
-		expect(result.children[1].children[0].tagName).to.equal('P')
+		expect(result.children[1].children[0].tag).to.equal('P')
 		expect(result.children[1].children[0].properties.className).to.equal('attribution')
 		expect(result.children[1].children[0].children.length).to.equal(2)
 		expect(result.children[1].children[0].children[0].text).to.equal('By ')
-		expect(result.children[1].children[0].children[1].tagName).to.equal('A')
+		expect(result.children[1].children[0].children[1].tag).to.equal('A')
 		expect(result.children[1].children[0].children[1].properties.href).to.equal('http://www.example.com')
 		expect(result.children[1].children[0].children[1].children.length).to.equal(1)
 		expect(result.children[1].children[0].children[1].children[0].text).to.equal('Fozzy Bear')

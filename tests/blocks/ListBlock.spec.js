@@ -1,10 +1,10 @@
 "use strict"
 
 var expect = require('chai').expect,
-	h = require('virtual-dom/h'),
 	window = require('jsdom').jsdom().defaultView,
 	document = window.document,
-	Model = require('mchammer').Model,
+	Model = require('../../baseline/Model'),
+	h = require('../../baseline/vdom').h,
 	List = require('../../baseline/List'),
 	Block = require('../../baseline/blocks/Block'),
 	ListBlock = require('../../baseline/blocks/ListBlock'),
@@ -39,11 +39,11 @@ describe('blocks.ListBlock', function ()
 		var block = new ListBlock(),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('UL')
+		expect(result.tag).to.equal('UL')
 		expect(result.children.length).to.equal(1)
-		expect(result.children[0].tagName).to.equal('LI')
+		expect(result.children[0].tag).to.equal('LI')
 		expect(result.children[0].children.length).to.equal(1)
-		expect(result.children[0].children[0].tagName).to.equal('BR')
+		expect(result.children[0].children[0].tag).to.equal('BR')
 	})
 	
 	it('renders correctly when not empty', function ()
@@ -53,12 +53,12 @@ describe('blocks.ListBlock', function ()
 										new TextRegion({ text: 'bar' }) ]) }),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('UL')
+		expect(result.tag).to.equal('UL')
 		expect(result.children.length).to.equal(2)
-		expect(result.children[0].tagName).to.equal('LI')
+		expect(result.children[0].tag).to.equal('LI')
 		expect(result.children[0].children.length).to.equal(1)
 		expect(result.children[0].children[0].text).to.equal('foo')
-		expect(result.children[1].tagName).to.equal('LI')
+		expect(result.children[1].tag).to.equal('LI')
 		expect(result.children[1].children.length).to.equal(1)
 		expect(result.children[1].children[0].text).to.equal('bar')
 	})
@@ -75,12 +75,12 @@ describe('blocks.ListBlock', function ()
 			}),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('FOO')
+		expect(result.tag).to.equal('FOO')
 		expect(result.children.length).to.equal(2)
-		expect(result.children[0].tagName).to.equal('BAR')
+		expect(result.children[0].tag).to.equal('BAR')
 		expect(result.children[0].children.length).to.equal(1)
 		expect(result.children[0].children[0].text).to.equal('foo')
-		expect(result.children[1].tagName).to.equal('BAR')
+		expect(result.children[1].tag).to.equal('BAR')
 		expect(result.children[1].children.length).to.equal(1)
 		expect(result.children[1].children[0].text).to.equal('bar')
 	})

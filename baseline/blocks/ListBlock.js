@@ -1,8 +1,8 @@
 "use strict"
 
-var h = require('virtual-dom/h'),
+var h = require('../vdom').h,
 	List = require('../List'),
-	Model = require('mchammer').Model,
+	Model = require('../Model'),
 	Block = require('./Block'),
 	TextRegion = require('./TextRegion')
 
@@ -69,10 +69,10 @@ var ListBlock = Model.extend(Block,
 
 ListBlock.recognize = function (vnode)
 {
-	if (vnode.tagName == 'UL' || vnode.tagName == 'OL')
+	if (vnode.tag == 'UL' || vnode.tag == 'OL')
 	{
 		return new ListBlock({
-			list_tag: vnode.tagName,
+			list_tag: vnode.tag,
 			regions: List(vnode.children.map(this.parse_region.bind(this)))
 		})
 	}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Baseline Example</title>
+</head>
+<body>
+	<script src="./js/baseline.js"></script>
+	<script>
+	
+	var vdom = baseline.vdom,
+		h = vdom.h,
+		vtree = vdom.render(
+			document,
+			h(
+				'div', 
+				{ id: 'editor', contentEditable: true },
+				h('p', 'This ', h('b', 'is a') ,' paragraph'),
+				h('p', 'This is ', h('b', h('em', 'another')),' paragraph')
+			)
+		)
+	document.querySelector('body').appendChild(vtree.dom_node)
+	var watcher = new vdom.Watcher({
+		MutationObserver: window.MutationObserver, 
+		vnode: vtree,
+		onchange: function (old_vnode, new_vnode)
+		{
+			console.log(new_vnode)
+		}
+	})
+	watcher.start()
+	</script>
+</body>
+</html>

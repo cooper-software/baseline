@@ -4,7 +4,7 @@ var chai = require('chai'),
 	expect = chai.expect,
 	sinon = require('sinon'),
 	sinon_chai = require('sinon-chai'),
-	Model = require('mchammer').Model,
+	Model = require('../../baseline/Model'),
 	Block = require('../../baseline/blocks/Block'),
 	SimpleBlock = require('../../baseline/blocks/SimpleBlock'),
 	TextRegion = require('../../baseline/blocks/TextRegion')
@@ -35,9 +35,9 @@ describe('blocks.SimpleBlock', function ()
 		var block = new SimpleBlock({}),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('P')
+		expect(result.tag).to.equal('P')
 		expect(result.children.length).to.equal(1)
-		expect(result.children[0].tagName).to.equal('BR')
+		expect(result.children[0].tag).to.equal('BR')
 	})
 	
 	it('renders correctly when not empty', function ()
@@ -45,7 +45,7 @@ describe('blocks.SimpleBlock', function ()
 		var block = new SimpleBlock({ tag: 'FOO', regions: [ new TextRegion({ text: 'blah blah' }) ] }),
 			result = block.render()
 		
-		expect(result.tagName).to.equal('FOO')
+		expect(result.tag).to.equal('FOO')
 		expect(result.children.length).to.equal(1)
 		expect(result.children[0].text).to.equal('blah blah')
 	})

@@ -1,6 +1,7 @@
 "use strict"
 
 var expect = require("chai").expect,
+	Model = require('../../baseline/Model'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType')
 
@@ -11,7 +12,7 @@ describe('annotations.Annotation', function ()
 		var ann = new Annotation()
 		expect(ann.offset).to.eql(0)
 		expect(ann.length).to.eql(0)
-		expect(ann.type.equals(new AnnotationType({ tag: 'STRONG' }))).to.be.true
+		expect(Model.equals(ann.type, new AnnotationType({ tag: 'STRONG' }))).to.be.true
 		expect(ann.attrs).to.eql({})
 		expect(ann.styles).to.eql({})
 	})

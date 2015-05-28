@@ -1,6 +1,8 @@
 "use strict"
 
-var VirtualElement = require('./VirtualElement')
+var model = require('./model'),
+	VirtualText = model.VirtualText,
+	VirtualElement = model.VirtualElement
 
 
 module.exports = function ()
@@ -16,14 +18,22 @@ module.exports = function ()
 	else
 	{
 		var properties = {},
-			children = []
+			children = [],
+			key = null
 			
 		process_args(Array.prototype.slice.call(arguments, 1), properties, children)
+		
+		if (properties.key)
+		{
+			key = properties.key
+			delete properties.key
+		}
 		
 		return new VirtualElement({
 			tag: arguments[0].toUpperCase(),
 			properties: properties,
-			children: children
+			children: children,
+			key: key
 		})
 	}
 }
@@ -37,9 +47,13 @@ var process_args = function (args, properties, children)
 			return
 		}
 		
-		if (arg.constructor == String || arg.constructor == VirtualElement)
+		if (arg.constructor == VirtualElement)
 		{
 			children.push(arg)
+		}
+		if (arg.constructor == String)
+		{
+			children.push(new VirtualText({ text: arg }))
 		}
 		else if (arg.constructor == Array)
 		{
@@ -51,6 +65,10 @@ var process_args = function (args, properties, children)
 			{
 				properties[k] = arg[k]
 			})
+		}
+		else if (arg.render)
+		{
+			children.push(arg)
 		}
 	})
 }

@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('mchammer').Model,
+var Model = require('../Model'),
 	Point = require('./Point'),
 	Range = require('./Range'),
 	DomPoint = require('./DomPoint'),

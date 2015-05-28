@@ -1,9 +1,11 @@
 "use strict"
 
-var h = require('virtual-dom/h'),
+var vdom = require('./vdom'),
+	h = vdom.h,
 	Document = require('./Document'),
 	Parser = require('./Parser'),
 	Renderer = require('./Renderer'),
+	List = require('./List'),
 	defaults = require('./defaults')
 
 
@@ -14,29 +16,56 @@ var Editor = function Editor(options)
 	this.container.addEventListener('keydown', this.onkeydown.bind(this))
 	this.container.addEventListener('keyup', this.onkeyup.bind(this))
 	this.container.addEventListener('keypress', this.onkeypress.bind(this))
-	this.document = new Document()
-	this.document_stack = []
+	
 	this.parser = new Parser({
 		block_recognizers: defaults.block_recognizers,
 		annotation_types: defaults.annotation_types
 	})
+	
 	this.renderer = new Renderer({ container: this.container })
-	this.update_from_presentation()
+	
+	this.document = new Document({
+		blocks: List(this.parser.parse_dom(this.container))
+	})
+	this.document_stack = []
+	
+	this.watchers = []
+	
+	this.render()
+}
+
+Editor.prototype.render = function ()
+{
+	this.renderer.render(this.document.blocks)
+	this.watchers = this.renderer.tree.children.map(function (vnode, i)
+	{
+		var watcher = vdom.watch({ vnode: vnode, onchange: this.parse_block.bind(this, i) })
+		watcher.start()
+		return watcher
+	}.bind(this))
+}
+
+Editor.prototype.parse_block = function (i)
+{
+	var vnode = this.renderer.tree.children[i],
+		block = this.parser.parse_vnode(vdom.parse(vnode.dom_node, false))
+	
+	console.log(block)
+	
+	if (block)
+	{
+		this.update_document({ blocks: this.document.blocks.replace(i, block) })
+	}
+	else
+	{
+		this.update_document({ blocks: this.document.blocks.remove(i) })
+	}
 }
 
 Editor.prototype.update_document = function (props)
 {
 	this.document_stack.push(this.document)
 	this.document = this.document.update(props)
-	this.renderer.render(this.document.blocks)
-}
-
-Editor.prototype.update_from_presentation = function ()
-{
-	this.update_document(
-	{
-		blocks: this.parser.parse_html('<div>'+this.container.innerHTML+'</div>')
-	})
 }
 
 Editor.prototype.onkeydown = function (e)
@@ -46,7 +75,7 @@ Editor.prototype.onkeydown = function (e)
 
 Editor.prototype.onkeyup = function (e)
 {
-	this.update_from_presentation()
+	
 }
 
 Editor.prototype.onkeypress = function (e)

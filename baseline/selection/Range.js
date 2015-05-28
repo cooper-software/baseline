@@ -1,6 +1,6 @@
 "use strict"
 
-var Model = require('mchammer').Model,
+var Model = require('../Model'),
 	Point = require('./Point'),
 	DomPoint = require('./DomPoint')
 
@@ -11,7 +11,7 @@ var Range = Model(
 	
 	is_collapsed: function ()
 	{
-		return this.start.equals(this.end, ['block', 'region', 'offset'])
+		return Model.equals(this.start, this.end, ['block', 'region', 'offset'])
 	},
 	
 	set_in_window: function (window, container, doc)

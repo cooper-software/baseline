@@ -43,12 +43,12 @@ gulp.task('build-dev', function ()
 
 gulp.task('watch', ['build'], function ()
 {
-    gulp.watch(['baseline/**/*.js'], ['build']);
+    gulp.watch(['baseline/**/*.js'], ['build'])
 })
 
 gulp.task('watch-dev', ['build-dev'], function ()
 {
-    gulp.watch(['baseline/**/*.js'], ['build-dev']);
+    gulp.watch(['baseline/**/*.js'], ['build-dev'])
 })
 
 gulp.task('default', ['build'])
