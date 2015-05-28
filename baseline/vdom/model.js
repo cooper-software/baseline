@@ -2,25 +2,29 @@
 
 var Model = require('../Model')
 
+var VirtualNode = Model(
+{
+	dom_node: null,
+	onchange: null,
+	watcher: null,
+	key: null
+})
+
+var VirtualText = Model.extend(VirtualNode,
+{
+	text: ''
+})
+
+var VirtualElement = Model.extend(VirtualNode,
+{
+	tag: 'P',
+	properties: {},
+	children: []
+})
+
 module.exports = 
 {
-	VirtualNode: Model(
-	{
-		dom_node: null
-	}),
-	
-	VirtualText: Model(
-	{
-		dom_node: null,
-		text: ''
-	}),
-	
-	VirtualElement: Model(
-	{
-		dom_node: null,
-		tag: 'P',
-		properties: {},
-		children: [],
-		key: null
-	})
+	VirtualNode: VirtualNode,
+	VirtualText: VirtualText,
+	VirtualElement: VirtualElement
 }

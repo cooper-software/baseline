@@ -1,6 +1,7 @@
 "use strict"
 
-var parse = require('./parse')
+var parse = require('./parse'),
+	MutationObserver = MutationObserver || function (){}
 
 
 var Watcher = function (options)

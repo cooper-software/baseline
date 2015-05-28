@@ -2,14 +2,14 @@
 
 var model = require('./model'),
 	VirtualText = model.VirtualText,
-	Thunk = model.Thunk
+	watch = require('./watch')
 	
 
 function render(document, vnode)
 {
 	if (vnode.render)
 	{
-		vnode = vnode.render(document)
+		vnode = vnode.render()
 	}
 	
 	if (vnode.dom_node)
@@ -27,6 +27,14 @@ function render(document, vnode)
 		set_properties(element, vnode.properties)
 		set_children(document, element, vnode.children)
 		vnode.dom_node = element
+	}
+	
+	if (vnode.onchange)
+	{
+		vnode.watcher = watch({
+			vnode: vnode,
+			onchange: vnode.onchange
+		})
 	}
 	
 	return vnode

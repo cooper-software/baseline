@@ -29,8 +29,6 @@ var Editor = function Editor(options)
 	})
 	this.document_stack = []
 	
-	this.watchers = []
-	
 	this.render()
 }
 

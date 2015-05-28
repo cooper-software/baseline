@@ -1,10 +1,15 @@
 "use strict"
 
-var expect = require('chai').expect,
+var chai = require('chai'),
+	expect = chai.expect,
+	sinon = require('sinon'),
+	sinon_chai = require('sinon-chai'),
 	window = require('jsdom').jsdom().defaultView,
 	document = window.document,
 	render = require('../../baseline/vdom/render'),
 	h = require('../../baseline/vdom/h')
+	
+chai.use(sinon_chai)
 	
 	
 describe('vdom.render', function ()
@@ -78,5 +83,18 @@ describe('vdom.render', function ()
 		expect(result.dom_node.childNodes[1].childNodes[0].nodeValue).to.equal('things')
 		expect(result.children[0].dom_node).to.equal(result.dom_node.childNodes[0])
 		expect(result.children[1].dom_node).to.equal(result.dom_node.childNodes[1])
+	})
+	
+	it('adds a watcher when there is an onchange field on a vnode', function ()
+	{
+		var onchange = sinon.spy(),
+			a = h('foo'),
+			b = h('bar', { onchange: onchange }),
+			result_a = render(document, a),
+			result_b = render(document, b)
+		
+		expect(a.watcher).to.be.null
+		expect(b.watcher).to.not.be.null
+		expect(b.watcher.onchange).to.equal(onchange)
 	})
 })

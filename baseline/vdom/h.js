@@ -19,7 +19,8 @@ module.exports = function ()
 	{
 		var properties = {},
 			children = [],
-			key = null
+			key = null,
+			onchange = null
 			
 		process_args(Array.prototype.slice.call(arguments, 1), properties, children)
 		
@@ -29,11 +30,18 @@ module.exports = function ()
 			delete properties.key
 		}
 		
+		if (properties.onchange)
+		{
+			onchange = properties.onchange
+			delete properties.onchange
+		}
+		
 		return new VirtualElement({
 			tag: arguments[0].toUpperCase(),
 			properties: properties,
 			children: children,
-			key: key
+			key: key,
+			onchange: onchange
 		})
 	}
 }
