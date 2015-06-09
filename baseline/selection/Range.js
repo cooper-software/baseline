@@ -40,6 +40,19 @@ var Range = Model(
 		var selection = window.getSelection()
 		selection.removeAllRanges()
 		selection.addRange(range)
+	},
+	
+	num_blocks: function ()
+	{
+		return this.end.block - this.start.block + 1
+	},
+	
+	collapse: function ()
+	{
+		return this.update(
+		{
+			end: this.start
+		})
 	}
 })
 

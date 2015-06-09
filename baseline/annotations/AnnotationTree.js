@@ -89,7 +89,7 @@ module.exports = Model(
 			
 		this.each(function (ann)
 		{
-			if (ann.type != type)
+			if (type && ann.type != type)
 			{
 				new_annotations.push(ann)
 				return

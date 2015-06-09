@@ -9,10 +9,8 @@ var VirtualText = require('./model').VirtualText,
  */
 function update(document, a, b)
 {
-	if (b.render)
-	{
-		b = b.render(document, a)
-	}
+	b = resolve_thunk(b, a)
+	a = resolve_thunk(a)
 	
 	if (a == b)
 	{
@@ -44,6 +42,7 @@ function replace (document, old_vnode, new_vnode)
 {
 	var vnode = render(document, new_vnode)
 	old_vnode.dom_node.parentNode.replaceChild(vnode.dom_node, old_vnode.dom_node)
+	old_vnode.watcher = null
 	return vnode
 }
 
@@ -197,7 +196,9 @@ function update_unkeyed_children (document, a, b)
 		var parent = a.dom_node
 		for (var i=b_length; i<a_length; i++)
 		{
-			parent.removeChild(a.children[i].dom_node)
+			var child = resolve_thunk(a.children[i])
+			parent.removeChild(child.dom_node)
+			child.watcher = null
 		}
 	}
 	else if (a_length < b_length)
@@ -242,8 +243,9 @@ function update_keyed_children (document, a, b)
 	
 	Object.keys(a_by_key).forEach(function (k)
 	{
-		var node = a_by_key[k].dom_node
-		node.parentNode.removeChild(node)
+		var vnode = a_by_key[k]
+		vnode.dom_node.parentNode.removeChild(vnode.dom_node)
+		vnode.watcher = null
 	})
 }
 
@@ -264,6 +266,29 @@ function remove_children (vnode)
 	while (node.lastChild)
 	{
 		node.removeChild(node.lastChild)
+	}
+	vnode.children.forEach(function (child)
+	{
+		child.watcher = null
+	})
+}
+
+function resolve_thunk(x, previous)
+{
+	if (x.render)
+	{
+		if (x.vnode)
+		{
+			return x.vnode
+		}
+		else
+		{
+			return x.render(previous)
+		}
+	}
+	else
+	{
+		return x
 	}
 }
 

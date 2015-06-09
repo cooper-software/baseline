@@ -2,6 +2,7 @@
 
 var vdom = require('./vdom'),
 	h = vdom.h,
+	Range = require('./selection/Range'),
 	Document = require('./Document'),
 	Parser = require('./Parser'),
 	Renderer = require('./Renderer'),
@@ -11,44 +12,63 @@ var vdom = require('./vdom'),
 
 var Editor = function Editor(options)
 {
+	options = options || {}
+	
+	this.allow_breaks = (options.allow_breaks === undefined) ? true : options.allow_breaks
+	this.onchange = options.onchange
+	this.dom_window = options.dom_window || window
+	this.dom_document = options.dom_document || document
+	
 	this.container = options.container
 	this.container.contentEditable = true
 	this.container.addEventListener('keydown', this.onkeydown.bind(this))
 	this.container.addEventListener('keyup', this.onkeyup.bind(this))
-	this.container.addEventListener('keypress', this.onkeypress.bind(this))
+	this.dom_document.addEventListener('mouseup', this.onmouseup.bind(this))
 	
 	this.parser = new Parser({
 		block_recognizers: defaults.block_recognizers,
 		annotation_types: defaults.annotation_types
 	})
 	
-	this.renderer = new Renderer({ container: this.container })
+	this.renderer = new Renderer({
+		container: this.container,
+		onchange: this.parse_block.bind(this),
+		document: this.dom_document
+	})
 	
 	this.document = new Document({
 		blocks: List(this.parser.parse_dom(this.container))
 	})
 	this.document_stack = []
+	this.document_stack_position = -1
 	
+	this.commands = {}
+	Object.keys(defaults.commands).forEach(function (k)
+	{
+		this.commands[k] = defaults.commands[k]
+	}.bind(this))
+	
+	this.update_range_from_window()
 	this.render()
+	
+	if (this.onchange)
+	{
+		this.onchange(
+			this.renderer.to_html(this.document.blocks)
+		)
+	}
 }
 
 Editor.prototype.render = function ()
 {
 	this.renderer.render(this.document.blocks)
-	this.watchers = this.renderer.tree.children.map(function (vnode, i)
-	{
-		var watcher = vdom.watch({ vnode: vnode, onchange: this.parse_block.bind(this, i) })
-		watcher.start()
-		return watcher
-	}.bind(this))
 }
 
 Editor.prototype.parse_block = function (i)
 {
-	var vnode = this.renderer.tree.children[i],
+	var x = this.renderer.tree.children[i],
+		vnode = x.vnode || x,
 		block = this.parser.parse_vnode(vdom.parse(vnode.dom_node, false))
-	
-	console.log(block)
 	
 	if (block)
 	{
@@ -57,6 +77,7 @@ Editor.prototype.parse_block = function (i)
 	else
 	{
 		this.update_document({ blocks: this.document.blocks.remove(i) })
+		this.render()
 	}
 }
 
@@ -64,107 +85,112 @@ Editor.prototype.update_document = function (props)
 {
 	this.document_stack.push(this.document)
 	this.document = this.document.update(props)
-}
-
-Editor.prototype.onkeydown = function (e)
-{
 	
+	if (this.onchange)
+	{
+		this.onchange(
+			this.renderer.to_html(this.document.blocks)
+		)
+	}
 }
 
-Editor.prototype.onkeyup = function (e)
+Editor.prototype.undo = function ()
 {
+	if (this.document_stack_position < 0)
+	{
+		return
+	}
 	
+	this.document_stack_position--
+	this.document = this.document_stack[this.document_stack_position]
+	this.render()
 }
 
-Editor.prototype.onkeypress = function (e)
+Editor.prototype.redo = function ()
 {
+	if (this.document_stack.length <= this.document_stack_position)
+	{
+		return
+	}
 	
+	this.document_stack_position++
+	this.document = this.document_stack[this.document_stack_position]
+	this.render()
 }
 
-/*
+Editor.prototype.update_range_from_window = function ()
+{
+	this.range = Range.get_from_window(this.dom_window, this.container, this.document)
+}
+
+Editor.prototype.run_command = function (command)
+{
+	command(this)
+	this.render()
+	this.range.set_in_window(this.dom_window, this.container, this.document)
+}
+
 Editor.prototype.onmouseup = function (evt)
 {
-	setTimeout(function ()
-	{
-		this.document.range = selection.get(this.document, this.container)
-		this.menu.ctrl.update_position()
-	}.bind(this))
+	setTimeout(this.update_range_from_window.bind(this))
 }
 	
 Editor.prototype.onkeydown = function (evt)
 {
-	this.last_char_code = null
-	
-	if (evt.which == 13 || evt.which == 5 ||
+	// Check for a new line, carriage return, etc.
+	if (evt.which == 13 || 
+		evt.which == 5 ||
 		(evt.which == 77 && evt.ctrlKey))
 	{
 		evt.preventDefault()
-		if (this.allow_block_insertion)
+		if (this.allow_breaks)
 		{
-			commands.insert_block(this.document, this.allow_escape_enclosing_block)
-			this.render()
+			this.run_command(this.commands.insert_block)
 		}
 	}
+	// Check for a delete or backspace
 	else if (evt.which == 8 || evt.which == 46)
 	{
-		if (this.document.range.is_collapsed())
+		if (this.range.is_collapsed())
 		{
-			if (this.document.range.start.offset == 0)
+			if (this.range.start.offset == 0)
 			{
 				evt.preventDefault()
-				commands.merge_with_previous(this.document)
-				this.render()
-				this.skip_next_sync = true
+				this.run_command(this.commands.merge_block_with_previous)
 			}
 		}
-		else if (this.document.range.num_blocks() > 1)
+		else if (this.range.num_blocks() > 1)
 		{
 			evt.preventDefault()
-			commands.delete(this.document)
-			this.render()
-			this.skip_next_sync = true
+			this.run_command(this.commands.delete_range)
 		}
+		/*
+		else
+		{
+			// let the browser handle character insertion and deletion
+		}
+		*/
 	}
-	else if (this.document.range && this.document.range.num_blocks() > 1 &&
-		!evt.metaKey &&
-		(evt.which < 37 || evt.which > 40))
+	else if (evt.metaKey)
 	{
-		
-		commands.delete(this.document)
-		this.render()
+		evt.preventDefault()
+		console.log(evt)
+	}
+	else
+	{
+		this.run_command(this.commands.delete_range)
 	}
 }
 	
 Editor.prototype.onkeyup = function (evt)
 {
-	this.document.range = selection.get(this.document, this.container)
-	
-	if (evt.which == 8 || evt.which == 46)
-	{
-		if (this.document.range.num_blocks() == 1)
-		{
-			this.sync()
-		}
-	}
-	else if (this.document.range.num_blocks() == 1 && this.last_char_code)
-	{
-		this.sync()
-	}
-	
-	this.menu.ctrl.update_position()
-}
-	
-Editor.prototype.onkeypress = function (evt)
-{
-	this.last_char_code = evt.charCode
+	console.log('keyup')
+	this.update_range_from_window()
 }
 	
 Editor.prototype.onpaste = function (evt)
 {
 	evt.preventDefault()
-	commands.paste(this.document, evt, this.allowed_paste_types)
-	this.render()
 }
-*/
 
 module.exports = Editor

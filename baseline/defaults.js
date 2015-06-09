@@ -43,5 +43,12 @@ module.exports =
 	block_recognizers: [
 		ListBlock.recognize,
 		FigureBlock.recognize
-	]
+	],
+	
+	commands: 
+	{
+		merge_block_with_previous: require('./commands/merge_block_with_previous'),
+		delete_range: require('./commands/delete_range'),
+		insert_block: require('./commands/insert_block')
+	}
 }

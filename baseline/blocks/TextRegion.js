@@ -10,6 +10,42 @@ module.exports = Model(
 	text: '',
 	annotations: new AnnotationTree(),
 	
+	delete: function (start, end)
+	{
+		start = Math.max(Math.min(start, this.text.length), 0)
+		end = Math.max(Math.min(end, this.text.length), 0)
+		
+		if (start > end)
+		{
+			var tmp = start
+			start = end
+			end = start
+		}
+		
+		return this.update(
+		{
+			text: this.text.substr(0, start) + this.text.substr(end),
+			annotations: this.annotations.remove(start, end)
+		})
+	},
+	
+	append: function (region)
+	{
+		var first_region_text_length = this.text.length
+		return this.update(
+		{
+			text: this.text + region.text,
+			annotations: this.annotations.concat(
+				region.annotations.to_array().map(function (ann)
+				{
+					return ann.update({
+						offset: ann.offset + first_region_text_length
+					})
+				})
+			)
+		})
+	},
+	
 	render: function ()
 	{
 		var text = this.fix_spaces(this.text)
@@ -108,8 +144,14 @@ module.exports = Model(
 	{
 		// assert(dom_point inside this region)
 		
-		var offset = 0,
-			children = Array.prototype.slice.apply(root_node.childNodes)
+		var offset = { value: 0 }
+		this._get_offset_of_dom_point(root_node, dom_point, offset)
+		return offset.value
+	},
+	
+	_get_offset_of_dom_point: function (root_node, dom_point, offset)
+	{
+		var children = Array.prototype.slice.apply(root_node.childNodes)
 		
 		for (var i=0; i<children.length; i++)
 		{
@@ -117,19 +159,25 @@ module.exports = Model(
 			
 			if (child == dom_point.node)
 			{
-				return offset + dom_point.offset
+				offset.value += dom_point.offset
+				return -1
 			}
-			else if (child.nodeType == 3) // TEXT_NODE
+			else if (child.nodeType == 3)
 			{
-				offset += child.nodeValue.length
+				offset.value += child.nodeValue.length
 			}
-			else
+			else if (child.nodeType == 1)
 			{
-				offset += this.get_offset_of_dom_point(child, dom_point)
+				var result = this._get_offset_of_dom_point(child, dom_point, offset)
+				
+				if (result < 0)
+				{
+					return -1
+				}
 			}
 		}
 		
-		return offset
+		return 1
 	},
 	
 	get_dom_point: function (root_node, point)

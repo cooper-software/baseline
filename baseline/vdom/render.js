@@ -35,6 +35,7 @@ function render(document, vnode)
 			vnode: vnode,
 			onchange: vnode.onchange
 		})
+		vnode.watcher.start()
 	}
 	
 	return vnode
@@ -89,8 +90,9 @@ function set_children(document, element, children)
 		}
 		else
 		{
-			render(document, child)
-			element.appendChild(child.dom_node)
+			element.appendChild(
+				render(document, child).dom_node
+			)
 		}
 	})
 }

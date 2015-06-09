@@ -13,7 +13,7 @@ var chai = require('chai'),
 	SimpleBlock = require('../../baseline/blocks/SimpleBlock'),
 	TextRegion = require('../../baseline/blocks/TextRegion'),
 	Document = require('../../baseline/Document')
-
+	
 chai.use(sinon_chai)
 	
 describe("selection.Range", function ()
@@ -61,6 +61,39 @@ describe("selection.Range", function ()
 		expect(range.end.region).to.equal(0)
 		expect(range.end.offset).to.equal(1)
 	})
+
+	it('can map a dom selection to a range when there are annotations', function ()
+	{
+		var container = document.createElement('div')
+		container.innerHTML = '<p>foo</p><p>b<b>aaaar</b> <b>quux</b></p><p>baz</p>'
+		
+		var doc = {
+				blocks: [
+					new SimpleBlock({ regions: [ new TextRegion({ text: 'foo' }) ] }),
+					new SimpleBlock({ regions: [ new TextRegion({ text: 'baaaar quux' }) ] }),
+					new SimpleBlock({ regions: [ new TextRegion({ text: 'baz' }) ] })
+				]
+			},
+			win = {
+				getSelection: function ()
+				{
+					return {
+						anchorNode: container.childNodes[0].childNodes[0],
+						anchorOffset: 1,
+						focusNode: container.childNodes[2].childNodes[0],
+						focusOffset: 1
+					}
+				}
+			},
+			range = Range.get_from_window(win, container, doc)
+		
+		expect(range.start.block).to.equal(0)
+		expect(range.start.region).to.equal(0)
+		expect(range.start.offset).to.equal(1)
+		expect(range.end.block).to.equal(2)
+		expect(range.end.region).to.equal(0)
+		expect(range.end.offset).to.equal(1)
+	})
 	
 	it('does nothing when attempting to set a selection that doesn\'t exist in the baseline model', function ()
 	{
@@ -105,7 +138,6 @@ describe("selection.Range", function ()
 				start: new Point({ offset: 4 }),
 				end: new Point({ offset: 7 })
 			}),
-			container = document.createElement('div'),
 			window_range = {
 				setStart: sinon.spy(),
 				setEnd: sinon.spy()
@@ -113,7 +145,8 @@ describe("selection.Range", function ()
 			window_selection = {
 				removeAllRanges: sinon.spy(),
 				addRange: sinon.spy()
-			}
+			},
+			container = document.createElement('div')
 			
 		container.innerHTML = '<p>Foo bar baz</p>'
 		
@@ -123,10 +156,10 @@ describe("selection.Range", function ()
 		
 		expect(window.document.createRange).to.have.been.calledOnce
 		expect(window_range.setStart).to.have.been.calledOnce
-		expect(window_range.setStart.args[0][0]).to.equal(container.childNodes[0].childNodes[0])
+		expect(window_range.setStart.args[0][0].nodeValue).to.equal(container.childNodes[0].childNodes[0].nodeValue)
 		expect(window_range.setStart.args[0][1]).to.equal(4)
 		expect(window_range.setEnd).to.have.been.called
-		expect(window_range.setEnd.args[0][0]).to.equal(container.childNodes[0].childNodes[0])
+		expect(window_range.setEnd.args[0][0].nodeValue).to.equal(container.childNodes[0].childNodes[0].nodeValue)
 		expect(window_range.setEnd.args[0][1]).to.equal(7)
 		expect(window.getSelection).to.have.been.calledOnce
 		expect(window_selection.removeAllRanges).to.have.been.calledOnce

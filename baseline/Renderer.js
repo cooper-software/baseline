@@ -8,19 +8,25 @@ var BlockThunk = function (block, onchange)
 {
 	this.onchange = onchange
 	this.block = block
+	this.vnode = null
 }
 BlockThunk.prototype.render = function (previous)
 {
-	if (previous && previous.vnode && 
+	if (this.vnode)
+	{
+		return this.vnode
+	}
+	else if (previous && previous.vnode && 
 		previous.block == this.block)
 	{
+		this.vnode = previous.vnode
 		return previous.vnode
 	}
 	else
 	{
-		var vnode = this.block.render()
-		vnode.onchange = this.onchange
-		return vnode
+		this.vnode = this.block.render()
+		this.vnode.onchange = this.onchange
+		return this.vnode
 	}
 }
 
@@ -40,8 +46,7 @@ Renderer.prototype.render = function (blocks)
 	if (this.tree)
 	{
 		var new_tree = this.create_tree(blocks)
-		this.vdom_update(this.document, this.tree, new_tree)
-		this.tree = new_tree
+		this.tree = this.vdom_update(this.document, this.tree, new_tree)
 	}
 	else
 	{
@@ -60,11 +65,11 @@ Renderer.prototype.replace = function (blocks)
 	    this.container.removeChild(this.container.lastChild);
 	}
 	
-	var vnode = this.vdom_render(this.document, this.tree)
+	this.tree = this.vdom_render(this.document, this.tree)
 	
-	while (vnode.dom_node.firstChild)
+	while (this.tree.dom_node.firstChild)
 	{
-		this.container.appendChild(vnode.dom_node.firstChild)
+		this.container.appendChild(this.tree.dom_node.firstChild)
 	}
 	
 	this.tree.dom_node = this.container
@@ -80,6 +85,13 @@ Renderer.prototype.create_tree = function (blocks)
 	{
 		return h('div')
 	}
+}
+
+Renderer.prototype.to_html = function (blocks)
+{
+	var tree = this.create_tree(blocks)
+	tree = this.vdom_render(this.document, this.tree)
+	return tree.dom_node.innerHTML
 }
 
 module.exports = Renderer

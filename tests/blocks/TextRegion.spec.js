@@ -119,7 +119,10 @@ describe('blocks.TextRegion', function ()
 					{
 						nodeType: 1,
 						childNodes: [
-							{}
+							{
+								nodeType: 1,
+								childNodes: []
+							}
 						]
 					}
 				]
@@ -150,7 +153,10 @@ describe('blocks.TextRegion', function ()
 								nodeType: 3,
 								nodeValue: 'baz'
 							},
-							{}
+							{
+								nodeType: 3,
+								nodeValue: 'qux'
+							}
 						]
 					}
 				]
@@ -162,6 +168,51 @@ describe('blocks.TextRegion', function ()
 	})
 	
 	it('returns correct offset when there are multiple children and deep nesting', function ()
+	{
+		var region = new TextRegion(),
+			root_node = {
+				childNodes: [
+					{
+						nodeType: 3,
+						nodeValue: 'This is '
+					},
+					{
+						nodeType: 1,
+						childNodes: [
+							{
+								nodeType: 3,
+								nodeValue: 'some '
+							}
+						]
+					},
+					{
+						nodeType: 1,
+						childNodes: [
+							{
+								nodeType: 1,
+								childNodes: [
+									{
+										nodeType: 1,
+										childNodes: [
+											{
+												nodeType: 3,
+												nodeValue: 'text'
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			dom_point = { node: root_node.childNodes[1].childNodes[0], offset: 2 },
+			offset = region.get_offset_of_dom_point(root_node, dom_point)
+		
+		expect(offset).to.equal(10)
+	})
+	
+	it('returns correct offset when looking past deep nesting', function ()
 	{
 		var region = new TextRegion(),
 			root_node = {
@@ -188,14 +239,21 @@ describe('blocks.TextRegion', function ()
 										nodeType: 3,
 										nodeValue: 'qux'
 									},
-									{}
+									{
+										nodeType: 1,
+										childNodes: []
+									}
 								]
 							}
 						]
+					},
+					{
+						nodeType: 3,
+						nodeValue: 'quack'
 					}
 				]
 			},
-			dom_point = { node: root_node.childNodes[2].childNodes[1].childNodes[1], offset: 5 },
+			dom_point = { node: root_node.childNodes[3], offset: 5 },
 			offset = region.get_offset_of_dom_point(root_node, dom_point)
 		
 		expect(offset).to.equal(17)
@@ -223,13 +281,13 @@ describe('blocks.TextRegion', function ()
 					new Annotation({ offset: 8, length: 3, type: ann_type })
 				])
 			}),
-			point = new Point({ offset: 1 }),
+			point = new Point({ offset: 5 }),
 			node = document.createElement('p')
 		
 		node.innerHTML = 'Foo <z>bar</z> <z>baz</z>'
 		
 		var dom_point = region.get_dom_point(node, point)
-		expect(dom_point.node).to.equal(node.childNodes[0])
+		expect(dom_point.node).to.equal(node.childNodes[1].childNodes[0])
 		expect(dom_point.offset).to.equal(1)
 	})
 	
@@ -251,5 +309,70 @@ describe('blocks.TextRegion', function ()
 		expect(dom_point.node.nodeName).to.equal('#text')
 		expect(dom_point.node.nodeValue).to.equal('baz')
 		expect(dom_point.offset).to.equal(2)
+	})
+	
+	it('can delete a range when there are no annotations', function ()
+	{
+		var region = new TextRegion({ text: 'This is some text' }),
+			changed_region = region.delete(1, 5)
+		
+		expect(region.text).to.equal('This is some text')
+		expect(changed_region.text).to.equal('Tis some text')
+	})
+	
+	it('can delete a range when there are annotations', function ()
+	{
+		var ann_type = new AnnotationType({ tag: 'foo' }),
+			region = new TextRegion({
+				text: 'This is some text',
+				annotations: (new AnnotationTree()).concat([
+					new Annotation({ offset: 1, length: 2, type: ann_type }),
+					new Annotation({ offset: 4, length: 2, type: ann_type }),
+					new Annotation({ offset: 8, length: 1, type: ann_type })
+				])
+			}),
+			changed_region = region.delete(1, 5),
+			changed_anns = changed_region.annotations.to_array()
+		
+		expect(changed_region.text).to.equal('Tis some text')
+		expect(changed_anns.length).to.equal(2)
+	})
+	
+	it('can merge with another region', function ()
+	{
+		var ann_type = new AnnotationType({ tag: 'foo' }),
+			region_a = new TextRegion(
+			{
+				text: 'foo',
+				annotations: (new AnnotationTree()).concat([
+					new Annotation({ offset: 0, length: 2, type: ann_type })
+				])
+			}),
+			region_b = new TextRegion(
+			{
+				text: ' bar',
+				annotations: (new AnnotationTree()).concat([
+					new Annotation({ offset: 1, length: 2, type: ann_type })
+				])
+			}),
+			region_c = region_a.append(region_b)
+		
+		expect(region_a.text).to.equal('foo')
+		var region_a_annotations = region_a.annotations.to_array()
+		expect(region_a_annotations.length).to.equal(1)
+		expect(region_a_annotations[0].offset).to.equal(0)
+		expect(region_a_annotations[0].length).to.equal(2)
+		expect(region_b.text).to.equal(' bar')
+		var region_b_annotations = region_b.annotations.to_array()
+		expect(region_b_annotations.length).to.equal(1)
+		expect(region_b_annotations[0].offset).to.equal(1)
+		expect(region_b_annotations[0].length).to.equal(2)
+		expect(region_c.text).to.equal('foo bar')
+		var region_c_annotations = region_c.annotations.to_array()
+		expect(region_c_annotations.length).to.equal(2)
+		expect(region_c_annotations[0].offset).to.equal(0)
+		expect(region_c_annotations[0].length).to.equal(2)
+		expect(region_c_annotations[1].offset).to.equal(4)
+		expect(region_c_annotations[1].length).to.equal(2)
 	})
 })

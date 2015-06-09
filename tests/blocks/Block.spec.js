@@ -1,7 +1,9 @@
 "use strict"
 
 var expect = require('chai').expect,
-	Block = require('../../baseline/blocks/Block')
+	Block = require('../../baseline/blocks/Block'),
+	TextRegion = require('../../baseline/blocks/TextRegion'),
+	Point = require('../../baseline/selection/Point')
 
 describe('blocks.Block', function ()
 {
@@ -33,5 +35,65 @@ describe('blocks.Block', function ()
 		var dom_point = block.get_dom_point('foo')
 		expect(dom_point.node).to.equal('foo')
 		expect(dom_point.offset).to.equal(0)
+	})
+	
+	it('can delete a range within a region', function ()
+	{
+		var block = new Block({
+				regions: [ new TextRegion({ text: 'This is some text' }) ]
+			}),
+			changed_block = block.delete(
+				new Point({ region: 0, offset: 1 }),
+				new Point({ region: 0, offset: 5 })
+			)
+		
+		expect(block.regions.length).to.equal(1)
+		expect(block.regions[0].text).to.equal('This is some text')
+		expect(changed_block.regions.length).to.equal(1)
+		expect(changed_block.regions[0].text).to.equal('Tis some text')
+		
+	})
+	
+	it('can delete a range that spans multiple regions', function ()
+	{
+		var block = new Block({
+				regions: [
+					new TextRegion({ text: 'This is the first region' }),
+					new TextRegion({ text: 'This is the second region' }),
+					new TextRegion({ text: 'This is the third region' })
+				]
+			}),
+			changed_block = block.delete(
+				new Point({ region: 0, offset: 8 }),
+				new Point({ region: 2, offset: 5 })
+			)
+			
+	})
+	
+	it('can append another block to its end', function ()
+	{
+		var block_a = new Block({
+				regions: [
+					new TextRegion({ text: 'Text region one' }),
+					new TextRegion({ text: 'Text region two' })
+				]
+			}),
+			block_b = new Block({
+				regions: [
+					new TextRegion({ text: ' is text region two' }),
+					new TextRegion({ text: 'This is the third region' })
+				]
+			}),
+			block_c = block_a.append(block_b)
+		
+		expect(block_a.regions.length).to.equal(2)
+		expect(block_a.regions[0].text).to.equal('Text region one')
+		expect(block_a.regions[1].text).to.equal('Text region two')
+		expect(block_b.regions.length).to.equal(2)
+		expect(block_b.regions[0].text).to.equal(' is text region two')
+		expect(block_b.regions[1].text).to.equal('This is the third region')
+		expect(block_c.regions.length).to.equal(2)
+		expect(block_c.regions[0].text).to.equal('Text region one')
+		expect(block_c.regions[1].text).to.equal('Text region two is text region two')
 	})
 })

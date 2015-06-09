@@ -1,8 +1,13 @@
 "use strict"
 
 var parse = require('./parse'),
-	MutationObserver = MutationObserver || function (){}
-
+	window = typeof window == "undefined" ? null : window,
+	MutationObserver = window && window.MutationObserver ? window.MutationObserver : function ()
+	{
+		this.observe = function (){}
+		this.disconnect = function (){}
+		this.observe = function (){}
+	}
 
 var Watcher = function (options)
 {

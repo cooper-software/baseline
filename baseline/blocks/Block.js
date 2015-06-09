@@ -32,5 +32,49 @@ module.exports = Model(
 			node: block_node,
 			offset: 0
 		})
+	},
+	
+	delete: function (start, end)
+	{
+		return this.update(
+		{
+			regions: this.regions
+						.slice(0, start.region)
+						.concat([
+							this.regions[start.region].delete(
+								start.offset, 
+								end.region == start.region ? end.offset : this.regions[start.region].text.length
+							)
+						])
+						.concat(
+							end.region == start.region
+							? []
+							: [this.regions[end.region].delete(
+								0,
+								end.offset
+							)]
+						)
+						.concat(
+							this.regions.slice(end.region+1)
+						)
+		})
+	},
+	
+	append: function (block)
+	{
+		var last_region = this.regions[block.regions.length - 1],
+			first_region = block.regions[0]
+		
+		return this.update({
+			regions: this.regions
+						.slice(0, this.regions.length - 1)
+						.concat([ last_region.append(first_region) ])
+		})
+	},
+	
+	last_region: function ()
+	{
+		return this.regions[this.regions.length -1]
 	}
+	
 }, true)
