@@ -47,45 +47,6 @@ module.exports = Model(
 		})
 	},
 	
-	remove_and_collapse: function (offset_or_annotaton, length)
-	{
-		var range = this._get_range(offset_or_annotaton, length)
-		
-		if (this.end() < range.offset)
-		{
-			return this
-		}
-		else if (this.offset > end)
-		{
-			return this.update(
-			{
-				offset: this.offset - range.length
-			})
-		}
-		else if (this.offset >= range.offset && this.end() <= range.end)
-		{
-			return this.update(
-			{
-				length: 0
-			})
-		}
-		else if (this.offset > offset)
-		{
-			return this.update(
-			{
-				length: this.length - (range.end - range.offset),
-				offset: range.offset
-			})
-		}
-		else
-		{
-			return this.update(
-			{
-				length: this.length - (this.end() - offset)
-			})
-		}
-	},
-	
 	_get_range: function (offset_or_annotaton, length)
 	{
 		if (length === undefined)

@@ -15,9 +15,10 @@ describe('vdom.update', function ()
 	it('returns the original if the vnodes are equal', function ()
 	{
 		var node = h('foo'),
-			result = update(document, node, node)
+			result_a = render(document, node),
+			result_b = update(document, result_a, node)
 		
-		expect(result).to.equal(node)
+		expect(result_b).to.equal(result_a)
 	})
 	
 	it('replaces the old dom node with a new one if the nodes are of a different type', function ()
@@ -162,10 +163,5 @@ describe('vdom.update', function ()
 		
 		expect(result.dom_node).to.equal(a.dom_node)
 		expect(result.dom_node.childNodes.length).to.equal(0)
-	})
-	
-	it('processes a thunk', function ()
-	{
-		
 	})
 })

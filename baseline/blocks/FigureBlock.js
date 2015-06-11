@@ -13,6 +13,7 @@ var FigureBlock = Model.extend(Block,
 	height: 0,
 	attribution_name: '',
 	attribution_url: '',
+	regions: [],
 	
 	render: function ()
 	{

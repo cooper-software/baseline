@@ -45,6 +45,14 @@ Renderer.prototype.render = function (blocks)
 {
 	if (this.tree)
 	{
+		if (this.onchange)
+		{
+			this.tree.children.forEach(function (thunk)
+			{
+				thunk.vnode.watcher.stop()
+			})
+		}
+		
 		var new_tree = this.create_tree(blocks)
 		this.tree = this.vdom_update(this.document, this.tree, new_tree)
 	}
@@ -53,13 +61,20 @@ Renderer.prototype.render = function (blocks)
 		this.replace(blocks)
 	}
 	
+	if (this.onchange)
+	{
+		this.tree.children.forEach(function (thunk)
+		{
+			thunk.vnode.watcher.start()
+		})
+	}
+	
 	return this.tree
 }
 
 Renderer.prototype.replace = function (blocks)
 {
 	this.tree = this.create_tree(blocks)
-	
 	while (this.container.lastChild)
 	{
 	    this.container.removeChild(this.container.lastChild);
@@ -89,9 +104,7 @@ Renderer.prototype.create_tree = function (blocks)
 
 Renderer.prototype.to_html = function (blocks)
 {
-	var tree = this.create_tree(blocks)
-	tree = this.vdom_render(this.document, this.tree)
-	return tree.dom_node.innerHTML
+	return this.tree.dom_node.innerHTML
 }
 
 module.exports = Renderer

@@ -9,7 +9,6 @@ var vdom = require('./vdom'),
 	List = require('./List'),
 	defaults = require('./defaults')
 
-
 var Editor = function Editor(options)
 {
 	options = options || {}
@@ -22,8 +21,9 @@ var Editor = function Editor(options)
 	this.container = options.container
 	this.container.contentEditable = true
 	this.container.addEventListener('keydown', this.onkeydown.bind(this))
+	this.container.addEventListener('keypress', this.onkeypress.bind(this))
 	this.container.addEventListener('keyup', this.onkeyup.bind(this))
-	this.dom_document.addEventListener('mouseup', this.onmouseup.bind(this))
+	this.dom_document.addEventListener('selectionchange', this.onselectionchange.bind(this))
 	
 	this.parser = new Parser({
 		block_recognizers: defaults.block_recognizers,
@@ -66,17 +66,28 @@ Editor.prototype.render = function ()
 
 Editor.prototype.parse_block = function (i)
 {
-	var x = this.renderer.tree.children[i],
-		vnode = x.vnode || x,
-		block = this.parser.parse_vnode(vdom.parse(vnode.dom_node, false))
-	
-	if (block)
+	var thunk = this.renderer.tree.children[i],
+		vnode = thunk.vnode,
+		new_vnode = vdom.parse(vnode.dom_node, true),
+		new_block = this.parser.parse_vnode(new_vnode),
+		blocks = this.document.blocks
+		
+	if (new_block)
 	{
-		this.update_document({ blocks: this.document.blocks.replace(i, block) })
+		this.update_document({
+			blocks: blocks.slice(0, i)
+						.concat([new_block])
+						.concat(blocks.slice(i+1))
+		})
+		thunk.vnode = new_vnode
+		thunk.vnode.watcher = vnode.watcher
+		thunk.block = new_block
 	}
 	else
 	{
-		this.update_document({ blocks: this.document.blocks.remove(i) })
+		this.update_document({
+			blocks: blocks.slice(0, i).concat(blocks.slice(i+1))
+		})
 		this.render()
 	}
 }
@@ -129,27 +140,11 @@ Editor.prototype.run_command = function (command)
 	this.render()
 	this.range.set_in_window(this.dom_window, this.container, this.document)
 }
-
-Editor.prototype.onmouseup = function (evt)
-{
-	setTimeout(this.update_range_from_window.bind(this))
-}
 	
 Editor.prototype.onkeydown = function (evt)
 {
-	// Check for a new line, carriage return, etc.
-	if (evt.which == 13 || 
-		evt.which == 5 ||
-		(evt.which == 77 && evt.ctrlKey))
-	{
-		evt.preventDefault()
-		if (this.allow_breaks)
-		{
-			this.run_command(this.commands.insert_block)
-		}
-	}
 	// Check for a delete or backspace
-	else if (evt.which == 8 || evt.which == 46)
+	if (evt.which == 8 || evt.which == 46)
 	{
 		if (this.range.is_collapsed())
 		{
@@ -171,20 +166,30 @@ Editor.prototype.onkeydown = function (evt)
 		}
 		*/
 	}
-	else if (evt.metaKey)
+}
+
+Editor.prototype.onkeypress = function (evt)
+{
+	// Check for a new line, carriage return, etc.
+	if (evt.which == 13 || evt.which == 5 ||
+		(evt.which == 77 && evt.ctrlKey))
 	{
 		evt.preventDefault()
-		console.log(evt)
-	}
-	else
-	{
-		this.run_command(this.commands.delete_range)
+		
+		if (this.allow_breaks)
+		{
+			this.run_command(this.commands.insert_block)
+		}
 	}
 }
-	
+
 Editor.prototype.onkeyup = function (evt)
 {
-	console.log('keyup')
+	evt.preventDefault()
+}
+
+Editor.prototype.onselectionchange = function (evt)
+{
 	this.update_range_from_window()
 }
 	

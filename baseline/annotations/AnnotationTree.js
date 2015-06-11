@@ -73,74 +73,66 @@ module.exports = Model(
 		})
 	},
 	
-	remove_and_collapse: function (start, end)
-	{
-		return this.filter(function (ann)
-		{
-			ann.remove_and_collapse(start, end-start)
-			return ann.length != 0
-		})
-	},
-	
 	remove: function (start, end, type)
 	{
-		var new_annotations = [],
-			length = end-start
-			
-		this.each(function (ann)
+		var new_annotations = []
+		
+		this.root.walk(function (ann)
 		{
 			if (type && ann.type != type)
 			{
 				new_annotations.push(ann)
 				return
 			}
-			else if (ann.start >= start && ann.end() <= end)
-			{
-				return
-			}
-			else if (start > ann.offset && end < ann.end())
-			{
-				var before = ann.union(ann.offset, start - ann.offset),
-					after = ann.union(end, ann.end() - end)
-				
-				if (before.length > 0)
-				{
-					new_annotations.push(before)
-				}
-				if (after.length > 0)
-				{
-					new_annotations.push(after)
-				}
-			}
-			else if (ann.overlaps(start, length))
-			{
-				var new_length = ann.length,
-					new_offset = ann.offset
-					
-				if (end < ann.end())
-				{
-					new_length = ann.length - (end - ann.offset)
-					new_offset = end
-				}
-				else
-				{
-					new_length = start - ann.offset
-				}
-				
-				if (new_length > 0)
-				{
-					new_annotations.push(ann.update(
-					{
-						offset: new_offset,
-						length: new_length
-					}))
-				}
-			}
-			else
+			
+			var ann_start = ann.offset,
+				ann_end = ann.end(),
+				length = end - start
+			
+			if (ann_end <= start)
 			{
 				new_annotations.push(ann)
 			}
+			else if (ann_start >= end)
+			{
+				new_annotations.push(
+					ann.update({
+						offset: ann.offset - length
+					})
+				)
+			}
+			else
+			{
+				if (ann_start <= start)
+				{
+					var new_ann = ann.update(
+					{
+						offset: ann_start,
+						length: start - ann_start
+					})
+					
+					if (new_ann.length > 0)
+					{
+						new_annotations.push(new_ann)
+					}
+				}
+				
+				if (ann_end >= end)
+				{
+					var new_ann = ann.update(
+					{
+						offset: start,
+						length: ann_end - end
+					})
+					
+					if (new_ann.length > 0)
+					{
+						new_annotations.push(new_ann)
+					}
+				}
+			}
 		})
+		
 		return this.set(new_annotations)
 	},
 	

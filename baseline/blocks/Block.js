@@ -62,7 +62,7 @@ module.exports = Model(
 	
 	append: function (block)
 	{
-		var last_region = this.regions[block.regions.length - 1],
+		var last_region = this.last_region(),
 			first_region = block.regions[0]
 		
 		return this.update({
@@ -75,6 +75,21 @@ module.exports = Model(
 	last_region: function ()
 	{
 		return this.regions[this.regions.length -1]
+	},
+	
+	insert: function (point)
+	{
+		// assert(point.region >= 0 && point.region < this.regions.length &&
+		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
+		var region = this.regions[point.region]
+		return [
+			this.update({
+				regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.text.length) ])
+			}),
+			this.update({
+				regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+			})
+		]
 	}
 	
 }, true)

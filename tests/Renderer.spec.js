@@ -49,7 +49,7 @@ describe('Renderer', function ()
 			document: document,
 			container: document.createElement('div')
 		})
-		renderer.replace = sinon.spy()
+		sinon.spy(renderer, 'replace')
 		renderer.render([])
 		expect(renderer.replace).to.have.been.calledWith([])
 	})

@@ -14,6 +14,8 @@ function render(document, vnode)
 	
 	if (vnode.dom_node)
 	{
+		set_properties(vnode.dom_node, vnode.properties)
+		set_children(document, vnode.dom_node, vnode.children)
 		return vnode
 	}
 	
@@ -35,7 +37,6 @@ function render(document, vnode)
 			vnode: vnode,
 			onchange: vnode.onchange
 		})
-		vnode.watcher.start()
 	}
 	
 	return vnode
@@ -81,19 +82,9 @@ function set_children(document, element, children)
 	
 	children.forEach(function (child)
 	{
-		if (child.constructor == VirtualText)
-		{
-			child.dom_node = document.createTextNode(child.text)
-			element.appendChild(
-				child.dom_node
-			)
-		}
-		else
-		{
-			element.appendChild(
-				render(document, child).dom_node
-			)
-		}
+		element.appendChild(
+			render(document, child).dom_node
+		)
 	})
 }
 

@@ -326,9 +326,9 @@ describe('blocks.TextRegion', function ()
 			region = new TextRegion({
 				text: 'This is some text',
 				annotations: (new AnnotationTree()).concat([
-					new Annotation({ offset: 1, length: 2, type: ann_type }),
-					new Annotation({ offset: 4, length: 2, type: ann_type }),
-					new Annotation({ offset: 8, length: 1, type: ann_type })
+					new Annotation({ offset: 0, length: 5, type: ann_type }),
+					new Annotation({ offset: 3, length: 5, type: ann_type }),
+					new Annotation({ offset: 12, length: 3, type: ann_type })
 				])
 			}),
 			changed_region = region.delete(1, 5),
@@ -336,6 +336,10 @@ describe('blocks.TextRegion', function ()
 		
 		expect(changed_region.text).to.equal('Tis some text')
 		expect(changed_anns.length).to.equal(2)
+		expect(changed_anns[0].offset).to.equal(0)
+		expect(changed_anns[0].length).to.equal(4)
+		expect(changed_anns[1].offset).to.equal(8)
+		expect(changed_anns[1].length).to.equal(3)
 	})
 	
 	it('can merge with another region', function ()

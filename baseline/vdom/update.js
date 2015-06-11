@@ -12,6 +12,11 @@ function update(document, a, b)
 	b = resolve_thunk(b, a)
 	a = resolve_thunk(a)
 	
+	if (!a.dom_node)
+	{
+		throw new Error("Original vnode has no dom node")
+	}
+	
 	if (a == b)
 	{
 		return a
@@ -48,15 +53,9 @@ function replace (document, old_vnode, new_vnode)
 
 function update_text (document, a, b)
 {
-	if (a.text != b.text)
-	{
-		a.dom_node.nodeValue = b.text
-		b.dom_node = a.dom_node
-	}
-	else
-	{
-		return a
-	}
+	b.dom_node = a.dom_node
+	b.watcher = a.watcher
+	b.dom_node.nodeValue = b.text
 }
 
 function update_properties (a, b)
@@ -150,6 +149,7 @@ function remove_style (vnode, name)
 function update_children (document, a, b)
 {
 	b.dom_node = a.dom_node
+	b.watcher = a.watcher
 	
 	if (a.children.length == 0 && b.children.length == 0)
 	{
@@ -277,14 +277,7 @@ function resolve_thunk(x, previous)
 {
 	if (x.render)
 	{
-		if (x.vnode)
-		{
-			return x.vnode
-		}
-		else
-		{
-			return x.render(previous)
-		}
+		return x.render(previous)
 	}
 	else
 	{
