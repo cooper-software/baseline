@@ -9,7 +9,8 @@ var chai = require('chai'),
 	Renderer = require('../baseline/Renderer'),
 	vdom = require('../baseline/vdom'),
 	SimpleBlock = require('../baseline/blocks/SimpleBlock'),
-	TextRegion = require('../baseline/blocks/TextRegion')
+	TextRegion = require('../baseline/blocks/TextRegion'),
+	Parser = require('../baseline/Parser')
 
 chai.use(sinon_chai)
 
@@ -72,5 +73,30 @@ describe('Renderer', function ()
 		expect(renderer.container.childNodes[0].tagName).to.equal('P')
 		expect(renderer.container.childNodes[0].childNodes.length).to.equal(1)
 		expect(renderer.container.childNodes[0].childNodes[0].data).to.equal('foo')
+	})
+	
+	it('watches block-level vnodes for changes', function ()
+	{
+		var onchange = sinon.spy(),
+			renderer = new Renderer({
+				document: document,
+				container: document.createElement('div'),
+				onblockchange: onchange,
+				parser: new Parser()
+			})
+		renderer.render([ new SimpleBlock({ regions: [ new TextRegion({ text: 'foo' }) ] }), new SimpleBlock({ regions: [ new TextRegion({ text: 'bar' }) ] }) ])
+		
+		expect(renderer.tree.children.length).to.equal(2)
+		expect(renderer.tree.children[1].vnode.watcher).to.not.be.undefined
+		expect(renderer.tree.children[1].vnode.children[0].text).to.equal('bar')
+		
+		renderer.tree.children[1].vnode.children[0].dom_node.nodeValue = 'baz'
+		renderer.tree.children[1].vnode.watcher.onmutation([])
+		
+		expect(renderer.tree.children[1].vnode.children[0].text).to.equal('baz')
+		expect(onchange).to.have.been.called
+		expect(onchange.args[0][0]).to.equal(1)
+		expect(onchange.args[0][1].regions.length).to.equal(1)
+		expect(onchange.args[0][1].regions[0].text).to.equal('baz')
 	})
 })

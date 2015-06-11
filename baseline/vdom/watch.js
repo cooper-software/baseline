@@ -28,10 +28,18 @@ var Watcher = function (options)
 	this.vnode = options.vnode
 	this.onchange = options.onchange
 	this.observer = new (options.MutationObserver||MutationObserver)(this.onmutation.bind(this))
+	this.started = false
 }
 
 Watcher.prototype.start = function ()
 {
+	if (this.started)
+	{
+		return
+	}
+	
+	this.started = true
+	
 	this.observer.observe(
 		this.vnode.dom_node,
 		{
@@ -45,6 +53,12 @@ Watcher.prototype.start = function ()
 
 Watcher.prototype.stop = function ()
 {
+	if (!this.started)
+	{
+		return
+	}
+	
+	this.started = false
 	this.observer.disconnect()
 	this.observer.takeRecords()
 }

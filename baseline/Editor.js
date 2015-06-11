@@ -12,16 +12,22 @@ var Editor = function Editor(options)
 {
 	options = options || {}
 	
+	if (!options.container)
+	{
+		throw new Error('A container element is required')
+	}
+	
 	this.allow_breaks = (options.allow_breaks === undefined) ? true : options.allow_breaks
 	this.onchange = options.onchange
 	this.dom_window = options.dom_window || window
-	this.dom_document = options.dom_document || document
+	this.dom_document = this.dom_window.document
 	
 	this.container = options.container
 	this.container.contentEditable = true
 	this.container.addEventListener('keydown', this.onkeydown.bind(this))
 	this.container.addEventListener('keypress', this.onkeypress.bind(this))
 	this.container.addEventListener('keyup', this.onkeyup.bind(this))
+	this.container.addEventListener('paste', this.onpaste.bind(this))
 	this.dom_document.addEventListener('selectionchange', this.onselectionchange.bind(this))
 	
 	this.parser = new Parser({
@@ -31,8 +37,9 @@ var Editor = function Editor(options)
 	
 	this.renderer = new Renderer({
 		container: this.container,
-		onchange: this.parse_block.bind(this),
-		document: this.dom_document
+		onblockchange: this.onblockchange.bind(this),
+		document: this.dom_document,
+		parser: this.parser
 	})
 	
 	this.document = new Document({
@@ -49,13 +56,6 @@ var Editor = function Editor(options)
 	
 	this.update_range_from_window()
 	this.render()
-	
-	if (this.onchange)
-	{
-		this.onchange(
-			this.renderer.to_html(this.document.blocks)
-		)
-	}
 }
 
 Editor.prototype.render = function ()
@@ -63,14 +63,10 @@ Editor.prototype.render = function ()
 	this.renderer.render(this.document.blocks)
 }
 
-Editor.prototype.parse_block = function (i)
+Editor.prototype.onblockchange = function (i, new_block)
 {
-	var thunk = this.renderer.tree.children[i],
-		vnode = thunk.vnode,
-		new_vnode = vdom.parse(vnode.dom_node, true),
-		new_block = this.parser.parse_vnode(new_vnode),
-		blocks = this.document.blocks
-		
+	var blocks = this.document.blocks
+	
 	if (new_block)
 	{
 		this.update_document({
@@ -78,9 +74,6 @@ Editor.prototype.parse_block = function (i)
 						.concat([new_block])
 						.concat(blocks.slice(i+1))
 		})
-		thunk.vnode = new_vnode
-		thunk.vnode.watcher = vnode.watcher
-		thunk.block = new_block
 	}
 	else
 	{
@@ -98,9 +91,7 @@ Editor.prototype.update_document = function (props)
 	
 	if (this.onchange)
 	{
-		this.onchange(
-			this.renderer.to_html(this.document.blocks)
-		)
+		this.onchange(this)
 	}
 }
 
@@ -195,6 +186,11 @@ Editor.prototype.onselectionchange = function (evt)
 Editor.prototype.onpaste = function (evt)
 {
 	evt.preventDefault()
+}
+
+Editor.prototype.to_html = function ()
+{
+	return this.renderer.to_html()
 }
 
 module.exports = Editor

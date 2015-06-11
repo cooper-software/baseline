@@ -25,6 +25,12 @@ BlockThunk.prototype.render = function (previous)
 	else
 	{
 		this.vnode = this.block.render()
+		
+		if (this.block.opaque)
+		{
+			this.vnode.properties.contentEditable = false
+		}
+		
 		this.vnode.onchange = this.onchange
 		return this.vnode
 	}
@@ -37,7 +43,8 @@ var Renderer = function Renderer (options)
 	this.vdom_render = options.vdom_render || vdom.render
 	this.document = options.document || (typeof document == 'undefined' ? undefined : document)
 	this.container = options.container || (this.document ? this.document.createElement('div') : undefined)
-	this.onchange = options.onchange || function () {}
+	this.onblockchange = options.onblockchange || function () {}
+	this.parser = options.parser
 	this.tree = null
 }
 
@@ -45,13 +52,10 @@ Renderer.prototype.render = function (blocks)
 {
 	if (this.tree)
 	{
-		if (this.onchange)
+		this.tree.children.forEach(function (thunk)
 		{
-			this.tree.children.forEach(function (thunk)
-			{
-				thunk.vnode.watcher.stop()
-			})
-		}
+			thunk.vnode.watcher.stop()
+		})
 		
 		var new_tree = this.create_tree(blocks)
 		this.tree = this.vdom_update(this.document, this.tree, new_tree)
@@ -61,13 +65,10 @@ Renderer.prototype.render = function (blocks)
 		this.replace(blocks)
 	}
 	
-	if (this.onchange)
+	this.tree.children.forEach(function (thunk)
 	{
-		this.tree.children.forEach(function (thunk)
-		{
-			thunk.vnode.watcher.start()
-		})
-	}
+		thunk.vnode.watcher.start()
+	})
 	
 	return this.tree
 }
@@ -94,7 +95,7 @@ Renderer.prototype.create_tree = function (blocks)
 {
 	if (blocks.length > 0)
 	{
-		return h('div', blocks.map(function (x, i) { return new BlockThunk(x, this.onchange.bind(null, i)) }.bind(this)))
+		return h('div', blocks.map(function (x, i) { return new BlockThunk(x, this.onchange.bind(this, i)) }.bind(this)))
 	}
 	else
 	{
@@ -105,6 +106,26 @@ Renderer.prototype.create_tree = function (blocks)
 Renderer.prototype.to_html = function (blocks)
 {
 	return this.tree.dom_node.innerHTML
+}
+
+Renderer.prototype.onchange = function (index)
+{
+	var thunk = this.tree.children[index],
+		vnode = thunk.vnode,
+		new_vnode = vdom.parse(vnode.dom_node, true),
+		new_block = this.parser.parse_vnode(new_vnode)
+		
+	if (new_block)
+	{
+		thunk.vnode = new_vnode
+		thunk.vnode.watcher = vnode.watcher
+		thunk.block = new_block
+	}
+	
+	if (this.onblockchange)
+	{
+		this.onblockchange(index, new_block)
+	}
 }
 
 module.exports = Renderer

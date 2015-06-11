@@ -113,6 +113,7 @@ Parser.prototype.parse_region = function (vnode)
 	}
 }
 
+var all_whitespace = /^\s+$/
 Parser.prototype.parse_region_node = function (context, vnode)
 {
 	if (vnode.text)

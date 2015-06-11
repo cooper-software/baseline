@@ -2,10 +2,12 @@
 
 var h = require('../vdom').h,
 	Model = require('../Model'),
-	Block = require('./Block')
+	Block = require('./Block'),
+	TextRegion = require('./TextRegion')
 
 var FigureBlock = Model.extend(Block,
 {
+	opaque: true,
 	src: '',
 	alt: '',
 	caption: '',
@@ -13,16 +15,12 @@ var FigureBlock = Model.extend(Block,
 	height: 0,
 	attribution_name: '',
 	attribution_url: '',
-	regions: [],
+	regions: [ new TextRegion() ],
 	
 	render: function ()
 	{
 		return h(
 			'figure', 
-			{
-				contentEditable: false,
-				className: this.selected ? 'selected' : ''
-			},
 			[
 				h('img', {
 					src: this.src,
@@ -72,6 +70,11 @@ FigureBlock.recognize = function (vnode)
 	
 	vnode.children.forEach(function (child)
 	{
+		if (!child.tag)
+		{
+			return
+		}
+		
 		if (child.tag == 'IMG')
 		{
 			if (props.src)
@@ -79,23 +82,28 @@ FigureBlock.recognize = function (vnode)
 				return
 			}
 			
-			props.src = child.properties.src
-			props.alt = child.properties.alt
-			props.width = child.properties.width
-			props.height = child.properties.height
+			props.src = child.prop('src')
+			props.alt = child.prop('alt')
+			props.width = child.prop('width')
+			props.height = child.prop('height')
 		}
 		else if (child.tag == 'FIGCAPTION')
 		{
 			child.children.forEach(function (caption_child)
 			{
+				if (!caption_child.tag)
+				{
+					return
+				}
+				
 				if (caption_child.tag && 
 					caption_child.children.length > 0)
 				{
-					if (caption_child.properties.className == 'caption')
+					if (caption_child.prop('className') == 'caption')
 					{
 						props.caption = caption_child.children[0].text
 					}
-					else if (caption_child.properties.className == 'attribution')
+					else if (caption_child.prop('className') == 'attribution')
 					{
 						if (caption_child.children.length == 1 && caption_child.children[0].text)
 						{

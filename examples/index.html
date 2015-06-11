@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
 	<title>Baseline Example</title>
 	<style>
+	*
+	{
+		box-sizing: border-box;
+	}
 	body
 	{
 		margin: 0;
@@ -30,6 +35,11 @@
 		padding: 1em;
 		border-left: 1px solid #efefef;
 	}
+	figure
+	{
+		padding: 0;
+		margin: 0;
+	}
 	</style>
 </head>
 <body>
@@ -41,6 +51,18 @@
 			<li>List item two</li>
 			<li>List item three</li>
 		</ul>
+		<p>This is some more text</p>
+		<figure>
+			<img src="http://upload.wikimedia.org/wikipedia/en/b/b9/MagrittePipe.jpg" width="378" height="264" alt="Painting of a pipe with the words 'This is not a pipe'">
+			<figcaption>
+				<p class="caption">
+					This painting is sometimes given as an example of meta message conveyed by paralanguage. Compare with Korzybski's "The word is not the thing".
+				</p>
+				<p class="attribution">
+					The Treachery of Images by René Magritte
+				</p>
+			</figcaption>
+		</figure>
 	</div>
 	<textarea id="output"></textarea>
 	<script src="./js/baseline.js"></script>
@@ -49,11 +71,13 @@
 	var editor = new baseline.Editor(
 	{
 		container: document.getElementById('editor'),
-		onchange: function (html)
+		onchange: function (editor)
 		{
-			output.value = html
+			output.value = editor.to_html()
 		}
 	})
+	
+	output.value = editor.to_html()
 	</script>
 </body>
 </html>
