@@ -1,16 +1,17 @@
 "use strict"
 
 var h = require('../vdom').h,
-	List = require('../List'),
 	Model = require('../Model'),
 	Block = require('./Block'),
-	TextRegion = require('./TextRegion')
+	SimpleBlock = require('./SimpleBlock'),
+	TextRegion = require('./TextRegion'),
+	DomPoint = require('../selection/DomPoint')
 
 var ListBlock = Model.extend(Block,
 {
 	list_tag: 'UL',
 	item_tag: 'LI',
-	regions: List([ new TextRegion() ]),
+	regions: [ new TextRegion() ],
 	
 	render: function ()
 	{
@@ -22,6 +23,55 @@ var ListBlock = Model.extend(Block,
 				return h(item_tag, region.text == '' ? [ h('br') ] : region.render())
 			})
 		)
+	},
+	
+	insert: function (point)
+	{
+		// assert(point.region >= 0 && point.region < this.regions.length &&
+		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
+		var region = this.regions[point.region]
+		
+		if (region.text.length == 0 && point.region == this.regions.length - 1)
+		{
+			return {
+				blocks: [
+					this.update(
+					{
+						regions: this.regions
+									.slice(0, point.region)
+									.concat(
+										this.regions.slice(point.region+1)
+									)
+					}),
+					new SimpleBlock()
+				],
+				point: point.update({
+					block: point.block + 1,
+					region: 0,
+					offset: 0
+				})
+			}
+		}
+		else
+		{
+			return {
+				blocks: [
+					this.update(
+					{
+						regions: this.regions
+									.slice(0, point.region)
+									.concat([ region.delete(point.offset, region.text.length) ])
+									.concat([ region.delete(0, point.offset) ])
+									.concat(this.regions.slice(point.region+1))
+					})
+				],
+				point: point.update(
+				{
+					region: point.region + 1,
+					offset: 0
+				})
+			}
+		}
 	},
 	
 	get_position_of_dom_point: function (block_node, dom_point)
@@ -59,21 +109,32 @@ var ListBlock = Model.extend(Block,
 	
 	get_dom_point: function (block_node, point)
 	{
-		return new DomPoint(
-		{
-			node: block_node,
-			offset: 0
-		})
+		return this.regions[point.region].get_dom_point(block_node.childNodes[point.region], point)
 	}
 })
 
+var all_whitespace = /^\s+$/
 ListBlock.recognize = function (vnode)
 {
 	if (vnode.tag == 'UL' || vnode.tag == 'OL')
 	{
+		var regions = []
+		
+		vnode.children.forEach(function (child)
+		{
+			if (child.tag)
+			{
+				regions.push(this.parse_region(child))
+			}
+			else if (child.text && !all_whitespace.test(child.text))
+			{
+				regions.push(new TextRegion({ text: child.text }))
+			}
+		}.bind(this))
+		
 		return new ListBlock({
 			list_tag: vnode.tag,
-			regions: List(vnode.children.map(this.parse_region.bind(this)))
+			regions: regions
 		})
 	}
 }

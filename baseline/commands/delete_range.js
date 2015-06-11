@@ -33,7 +33,7 @@ module.exports = function (editor)
 										})),
 									truncated_end_block = end_block.delete(new Point({ region: 0, offset: 0 }), range.end)
 								
-								return [ truncated_start_block.append(truncated_end_block) ]
+								return truncated_start_block.append(truncated_end_block)
 							}
 						})()
 					)

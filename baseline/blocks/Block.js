@@ -36,27 +36,24 @@ module.exports = Model(
 	
 	delete: function (start, end)
 	{
+		var changed_region = this.regions[start.region].delete(
+			start.offset, 
+			end.region == start.region ? end.offset : this.regions[start.region].text.length
+		)
+		
+		if (end.region != start.region)
+		{
+			changed_region = changed_region.append(
+				this.regions[end.region].delete(0, end.offset)
+			)
+		}
+		
 		return this.update(
 		{
 			regions: this.regions
 						.slice(0, start.region)
-						.concat([
-							this.regions[start.region].delete(
-								start.offset, 
-								end.region == start.region ? end.offset : this.regions[start.region].text.length
-							)
-						])
-						.concat(
-							end.region == start.region
-							? []
-							: [this.regions[end.region].delete(
-								0,
-								end.offset
-							)]
-						)
-						.concat(
-							this.regions.slice(end.region+1)
-						)
+						.concat([ changed_region ])
+						.concat(this.regions.slice(end.region+1))
 		})
 	},
 	
@@ -65,11 +62,24 @@ module.exports = Model(
 		var last_region = this.last_region(),
 			first_region = block.regions[0]
 		
-		return this.update({
-			regions: this.regions
-						.slice(0, this.regions.length - 1)
-						.concat([ last_region.append(first_region) ])
-		})
+		var new_blocks = [
+			this.update({
+				regions: this.regions
+								.slice(0, this.regions.length - 1)
+								.concat([ last_region.append(first_region) ])
+			})
+		]
+		
+		if (block.regions.length > 1)
+		{
+			new_blocks.push(
+				block.update({
+					regions: block.regions.slice(1)
+				})
+			)
+		}
+		
+		return new_blocks
 	},
 	
 	last_region: function ()
@@ -82,14 +92,21 @@ module.exports = Model(
 		// assert(point.region >= 0 && point.region < this.regions.length &&
 		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
 		var region = this.regions[point.region]
-		return [
-			this.update({
-				regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.text.length) ])
-			}),
-			this.update({
-				regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+		return {
+			blocks: [
+				this.update({
+					regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.text.length) ])
+				}),
+				this.update({
+					regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+				})
+			],
+			point: point.update({
+				block: point.block + 1,
+				region: point.region + 1,
+				offset: 0
 			})
-		]
+		}
 	}
 	
 }, true)

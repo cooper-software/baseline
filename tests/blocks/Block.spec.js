@@ -65,9 +65,11 @@ describe('blocks.Block', function ()
 			}),
 			changed_block = block.delete(
 				new Point({ region: 0, offset: 8 }),
-				new Point({ region: 2, offset: 5 })
+				new Point({ region: 2, offset: 8 })
 			)
-			
+		
+		expect(changed_block.regions.length).to.equal(1)
+		expect(changed_block.regions[0].text).to.equal('This is the third region')
 	})
 	
 	it('can append another block to its end', function ()
@@ -84,7 +86,7 @@ describe('blocks.Block', function ()
 					new TextRegion({ text: 'This is the third region' })
 				]
 			}),
-			block_c = block_a.append(block_b)
+			result = block_a.append(block_b)
 		
 		expect(block_a.regions.length).to.equal(2)
 		expect(block_a.regions[0].text).to.equal('Text region one')
@@ -92,9 +94,14 @@ describe('blocks.Block', function ()
 		expect(block_b.regions.length).to.equal(2)
 		expect(block_b.regions[0].text).to.equal(' is text region two')
 		expect(block_b.regions[1].text).to.equal('This is the third region')
+		expect(result.length).to.equal(2)
+		var block_c = result[0],
+			block_d = result[1]
 		expect(block_c.regions.length).to.equal(2)
 		expect(block_c.regions[0].text).to.equal('Text region one')
 		expect(block_c.regions[1].text).to.equal('Text region two is text region two')
+		expect(block_d.regions.length).to.equal(1)
+		expect(block_d.regions[0].text).to.equal('This is the third region')
 	})
 	
 	it('has a default method to insert a new block inside the current one', function ()
@@ -105,13 +112,15 @@ describe('blocks.Block', function ()
 					new TextRegion({ text: 'Qux quack quint' })
 				]
 			}),
-			new_blocks = block.insert({ region: 1, offset: 4 })
+			result = block.insert(new Point({ block: 0, region: 1, offset: 4 }))
 		
-		expect(new_blocks.length).to.equal(2)
-		expect(new_blocks[0].regions.length).to.equal(2)
-		expect(new_blocks[0].regions[0].text).to.equal('Foo bar baz')
-		expect(new_blocks[0].regions[1].text).to.equal('Qux ')
-		expect(new_blocks[1].regions.length).to.equal(1)
-		expect(new_blocks[1].regions[0].text).to.equal('quack quint')
+		expect(result.blocks.length).to.equal(2)
+		expect(result.blocks[0].regions.length).to.equal(2)
+		expect(result.blocks[0].regions[0].text).to.equal('Foo bar baz')
+		expect(result.blocks[0].regions[1].text).to.equal('Qux ')
+		expect(result.blocks[1].regions.length).to.equal(1)
+		expect(result.blocks[1].regions[0].text).to.equal('quack quint')
+		expect(result.point.region).to.equal(2)
+		expect(result.point.offset).to.equal(0)
 	})
 })

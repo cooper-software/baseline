@@ -119,4 +119,39 @@ describe('baseline.commands', function ()
 		expect(editor.range.start.region).to.equal(0)
 		expect(editor.range.start.offset).to.equal(18)
 	})
+
+	it('merges regions within a block when merge_block_with_previous() is called for a region that is not the first', function ()
+	{
+		var container = document.createElement('div')
+		container.innerHTML = '<ul><li>Foo</li><li>Bar</li><li>Baz</li></ul>'
+		
+		var editor = new Editor({
+			dom_window: window,
+			dom_document: document,
+			container: container
+		})
+		
+		editor.render()
+		
+		var point = new Point({ block: 0, region: 1, offset: 0 })
+		editor.range = new Range({ start: point, end: point })
+		
+		var region_to_merge_with = editor.document.blocks[0].regions[0],
+			region_to_merge = editor.document.blocks[0].regions[1]
+		sinon.spy(region_to_merge_with, "append")
+		editor.range.set_in_window(window, container, editor.document)
+		editor.commands.merge_block_with_previous(editor)
+		editor.range.set_in_window(window, container, editor.document)
+		
+		expect(region_to_merge_with.append).to.have.been.calledWith(region_to_merge)
+		var blocks = editor.document.blocks
+		expect(blocks.length).to.equal(1)
+		expect(blocks[0].regions.length).to.equal(2)
+		expect(blocks[0].regions[0].text).to.equal('FooBar')
+		expect(blocks[0].regions[1].text).to.equal('Baz')
+		expect(editor.range.is_collapsed()).to.be.true
+		expect(editor.range.start.block).to.equal(0)
+		expect(editor.range.start.region).to.equal(0)
+		expect(editor.range.start.offset).to.equal(3)
+	})
 })

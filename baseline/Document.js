@@ -1,9 +1,8 @@
 "use strict"
 
-var Model = require('./Model'),
-	List = require('./List')
+var Model = require('./Model')
 
 module.exports = Model(
 {
-	blocks: List()
+	blocks: []
 })

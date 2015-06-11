@@ -6,7 +6,6 @@ var vdom = require('./vdom'),
 	Document = require('./Document'),
 	Parser = require('./Parser'),
 	Renderer = require('./Renderer'),
-	List = require('./List'),
 	defaults = require('./defaults')
 
 var Editor = function Editor(options)
@@ -37,7 +36,7 @@ var Editor = function Editor(options)
 	})
 	
 	this.document = new Document({
-		blocks: List(this.parser.parse_dom(this.container))
+		blocks: this.parser.parse_dom(this.container)
 	})
 	this.document_stack = []
 	this.document_stack_position = -1
