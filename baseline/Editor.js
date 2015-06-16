@@ -6,6 +6,7 @@ var vdom = require('./vdom'),
 	Document = require('./Document'),
 	Parser = require('./Parser'),
 	Renderer = require('./Renderer'),
+	ChangeTracker = require('./ChangeTracker'),
 	defaults = require('./defaults')
 
 var Editor = function Editor(options)
@@ -18,17 +19,18 @@ var Editor = function Editor(options)
 	}
 	
 	this.allow_breaks = (options.allow_breaks === undefined) ? true : options.allow_breaks
-	this.onchange = options.onchange
+	this.ondocumentchange = options.ondocumentchange
+	this.onselectionchange = options.onselectionchange
 	this.dom_window = options.dom_window || window
 	this.dom_document = this.dom_window.document
 	
 	this.container = options.container
 	this.container.contentEditable = true
-	this.container.addEventListener('keydown', this.onkeydown.bind(this))
-	this.container.addEventListener('keypress', this.onkeypress.bind(this))
-	this.container.addEventListener('keyup', this.onkeyup.bind(this))
-	this.container.addEventListener('paste', this.onpaste.bind(this))
-	this.dom_document.addEventListener('selectionchange', this.onselectionchange.bind(this))
+	this.container.addEventListener('keydown', this.keydown_handler.bind(this))
+	this.container.addEventListener('keypress', this.keypress_handler.bind(this))
+	this.container.addEventListener('keyup', this.keyup_handler.bind(this))
+	this.container.addEventListener('paste', this.paste_handler.bind(this))
+	this.dom_document.addEventListener('selectionchange', this.selectionchange_handler.bind(this))
 	
 	this.parser = new Parser({
 		block_recognizers: defaults.block_recognizers,
@@ -42,11 +44,18 @@ var Editor = function Editor(options)
 		parser: this.parser
 	})
 	
-	this.document = new Document({
-		blocks: this.parser.parse_dom(this.container)
-	})
-	this.document_stack = []
-	this.document_stack_position = -1
+	if (options.document)
+	{
+		this.document = options.document
+	}
+	else
+	{
+		this.document = new Document({
+			blocks: this.parser.parse_dom(this.container)
+		})
+	}
+	
+	this.changes = new ChangeTracker(this.document)
 	
 	this.commands = {}
 	Object.keys(defaults.commands).forEach(function (k)
@@ -86,37 +95,55 @@ Editor.prototype.onblockchange = function (i, new_block)
 
 Editor.prototype.update_document = function (props)
 {
-	this.document_stack.push(this.document)
 	this.document = this.document.update(props)
+	this.changes.push(this.document)
 	
-	if (this.onchange)
+	if (this.ondocumentchange)
 	{
-		this.onchange(this)
+		this.ondocumentchange(this)
 	}
 }
 
 Editor.prototype.undo = function ()
 {
-	if (this.document_stack_position < 0)
+	if (!this.changes.has_previous_state())
 	{
 		return
 	}
 	
-	this.document_stack_position--
-	this.document = this.document_stack[this.document_stack_position]
+	this.document = this.changes.previous()
 	this.render()
+	
+	if (this.ondocumentchange)
+	{
+		this.ondocumentchange(this)
+	}
 }
 
 Editor.prototype.redo = function ()
 {
-	if (this.document_stack.length <= this.document_stack_position)
+	if (!this.changes.has_next_state())
 	{
 		return
 	}
 	
-	this.document_stack_position++
-	this.document = this.document_stack[this.document_stack_position]
+	this.document = this.changes.next()
 	this.render()
+	
+	if (this.ondocumentchange)
+	{
+		this.ondocumentchange(this)
+	}
+}
+
+Editor.prototype.can_undo = function ()
+{
+	return this.changes.has_previous_state()
+}
+
+Editor.prototype.can_redo = function ()
+{
+	return this.changes.has_next_state()
 }
 
 Editor.prototype.update_range_from_window = function ()
@@ -131,7 +158,7 @@ Editor.prototype.run_command = function (command)
 	this.range.set_in_window(this.dom_window, this.container, this.document)
 }
 	
-Editor.prototype.onkeydown = function (evt)
+Editor.prototype.keydown_handler = function (evt)
 {
 	// Check for a delete or backspace
 	if (evt.which == 8 || evt.which == 46)
@@ -158,7 +185,7 @@ Editor.prototype.onkeydown = function (evt)
 	}
 }
 
-Editor.prototype.onkeypress = function (evt)
+Editor.prototype.keypress_handler = function (evt)
 {
 	// Check for a new line, carriage return, etc.
 	if (evt.which == 13 || evt.which == 5 ||
@@ -173,17 +200,22 @@ Editor.prototype.onkeypress = function (evt)
 	}
 }
 
-Editor.prototype.onkeyup = function (evt)
+Editor.prototype.keyup_handler = function (evt)
 {
 	evt.preventDefault()
 }
 
-Editor.prototype.onselectionchange = function (evt)
+Editor.prototype.selectionchange_handler = function (evt)
 {
 	this.update_range_from_window()
+	
+	if (this.onselectionchange)
+	{
+		this.onselectionchange(this)
+	}
 }
 	
-Editor.prototype.onpaste = function (evt)
+Editor.prototype.paste_handler = function (evt)
 {
 	evt.preventDefault()
 }

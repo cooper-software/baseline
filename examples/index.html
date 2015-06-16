@@ -3,46 +3,19 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Baseline Example</title>
-	<style>
-	*
-	{
-		box-sizing: border-box;
-	}
-	body
-	{
-		margin: 0;
-		padding: 0;
-		font-family: sans-serif;
-	}
-	#editor
-	{
-		position: absolute;
-		top: 0;
-		left: 0;
-		height: 100%;
-		width: 50%;
-		padding: 1em;
-	}
-	#output
-	{
-		position: absolute;
-		top: 0;
-		left: 50%;
-		height: 100%;
-		width: 50%;
-		border: none;
-		outline: none;
-		padding: 1em;
-		border-left: 1px solid #efefef;
-	}
-	figure
-	{
-		padding: 0;
-		margin: 0;
-	}
-	</style>
+	<link rel="stylesheet" type="text/css" href="example.css">
 </head>
 <body>
+	<div id="toolbar">
+		<ul>
+			<li><button id="action-bold"><b>B</b></button></li>
+			<li><button id="action-italic"><i>I</i></button></li>
+			<li><button id="action-underline"><u>U</u></button></li>
+			<li><button id="action-undo" disabled="true">Undo</button></li>
+			<li><button id="action-redo" disabled="true">Redo</button></li>
+		</ul>
+		<div id="revision">rev #0</div>
+	</div>
 	<div id="editor">
 		<p>This is <b>some <a href="#"><em>text</em></a></b></p>
 		<p>This is some other text</p>
@@ -53,7 +26,7 @@
 		</ul>
 		<p>This is some more text</p>
 		<figure>
-			<img src="http://upload.wikimedia.org/wikipedia/en/b/b9/MagrittePipe.jpg" width="378" height="264" alt="Painting of a pipe with the words 'This is not a pipe'">
+			<img src="treachery.jpg" width="378" height="264" alt="Painting of a pipe with the words 'This is not a pipe'">
 			<figcaption>
 				<p class="caption">
 					This painting is sometimes given as an example of meta message conveyed by paralanguage. Compare with Korzybski's "The word is not the thing".
@@ -64,20 +37,7 @@
 			</figcaption>
 		</figure>
 	</div>
-	<textarea id="output"></textarea>
-	<script src="./js/baseline.js"></script>
-	<script>
-	var output = document.getElementById('output')
-	var editor = new baseline.Editor(
-	{
-		container: document.getElementById('editor'),
-		onchange: function (editor)
-		{
-			output.value = editor.to_html()
-		}
-	})
-	
-	output.value = editor.to_html()
-	</script>
+	<script src="lib/baseline.js"></script>
+	<script src="example.js"></script>
 </body>
 </html>
