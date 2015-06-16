@@ -7,12 +7,6 @@ var expect = require('chai').expect,
 
 describe('blocks.Block', function ()
 {
-	it('has an opaque property that is false by default', function ()
-	{
-		var block = new Block()
-		expect(block.opaque).to.be.false
-	}),
-	
 	it('has a regions property', function ()
 	{
 		var block = new Block()

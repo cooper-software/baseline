@@ -7,7 +7,6 @@ var h = require('../vdom').h,
 
 var FigureBlock = Model.extend(Block,
 {
-	opaque: true,
 	src: '',
 	alt: '',
 	caption: '',
@@ -26,7 +25,12 @@ var FigureBlock = Model.extend(Block,
 					src: this.src,
 					alt: this.alt,
 					width: this.width,
-					height: this.height
+					height: this.height,
+					contentEditable: false,
+					ondragstart: function (e)
+					{
+						e.preventDefault()
+					}
 				}),
 				this.render_caption()
 			]
@@ -37,7 +41,7 @@ var FigureBlock = Model.extend(Block,
 	{
 		if (this.caption || this.attribution_name || this.attribution_url)
 		{
-			return h('figcaption', [
+			return h('figcaption', { contentEditable: false }, [
 				this.caption ? h('p', { className: 'caption' }, this.caption) : null,
 				this.render_attribution()
 			])

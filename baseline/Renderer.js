@@ -25,12 +25,6 @@ BlockThunk.prototype.render = function (previous)
 	else
 	{
 		this.vnode = this.block.render()
-		
-		if (this.block.opaque)
-		{
-			this.vnode.properties.contentEditable = false
-		}
-		
 		this.vnode.onchange = this.onchange
 		return this.vnode
 	}

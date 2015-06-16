@@ -5,9 +5,6 @@ var Model = require('../Model'),
 
 module.exports = Model(
 {
-	// True if this block should not be contenteditable
-	opaque: false,
-	
 	// A list of regions contained within this block
 	regions: [],
 	
