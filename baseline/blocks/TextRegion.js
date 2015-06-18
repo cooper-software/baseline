@@ -46,6 +46,34 @@ module.exports = Model(
 		})
 	},
 	
+	has_annotation: function (start, end, prototype_annotation)
+	{
+		return this.annotations.has_contiguous_condition(start, end, function (annotation)
+		{
+			return Model.equals(annotation, prototype_annotation, ['type', 'attrs', 'styles'])
+		})
+	},
+	
+	add_annotation: function (start, end, prototype_annotation)
+	{
+		return this.update({
+			annotations: this.annotations.add(
+				prototype_annotation.update(
+				{
+					offset: start,
+					length: end - start
+				})
+			)
+		})
+	},
+	
+	remove_annotation: function (start, end, prototype_annotation)
+	{
+		return this.update({
+			annotations: this.annotations.clear(start, end, prototype_annotation)
+		})
+	},
+	
 	render: function ()
 	{
 		var text = this.fix_spaces(this.text)

@@ -9,7 +9,9 @@ var chai = require('chai'),
 	Block = require('../baseline/blocks/Block'),
 	Editor = require('../baseline/Editor'),
 	Range = require('../baseline/selection/Range'),
-	Point = require('../baseline/selection/Point')
+	Point = require('../baseline/selection/Point'),
+	Annotation = require('../baseline/annotations/Annotation'),
+	defaults = require('../baseline/defaults')
 
 chai.use(sinon_chai)
 
@@ -154,4 +156,39 @@ describe('baseline.commands', function ()
 		expect(editor.range.start.region).to.equal(0)
 		expect(editor.range.start.offset).to.equal(3)
 	})
+	
+	it('has a command to toggle annotations on and off', sinon.test(function ()
+	{
+		var container = document.createElement('div')
+		container.innerHTML = '<p>This is <b>block one.</b></p><p><b>This was</b> block two.</p>'
+		
+		var editor = new Editor({
+			dom_window: window,
+			dom_document: document,
+			container: container
+		})
+		
+		editor.range = new Range({
+			start: new Point({ block: 0, region: 0, offset: 14 }),
+			end: new Point({ block: 1, region: 0, offset: 4 })
+		})
+		
+		var proto_ann = new Annotation({ type: defaults.named_annotation_types.bold })
+		
+		this.stub(editor.document, "has_annotation").returns(true)
+		this.stub(editor.document, "add_annotation").returns('foo')
+		this.stub(editor.document, "remove_annotation").returns('bar')
+		
+		editor.commands.toggle_annotation(editor, proto_ann)
+		
+		expect(editor.document.has_annotation).to.have.been.called
+		expect(editor.document.has_annotation.args[0][0]).to.equal(editor.range)
+		expect(editor.document.has_annotation.args[0][1]).to.equal(proto_ann)
+		
+		expect(editor.document.add_annotation).to.not.have.been.called
+		
+		expect(editor.document.remove_annotation).to.have.been.called
+		expect(editor.document.remove_annotation.args[0][0]).to.equal(editor.range)
+		expect(editor.document.remove_annotation.args[0][1]).to.equal(proto_ann)
+	}))
 })

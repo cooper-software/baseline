@@ -1,6 +1,10 @@
 "use strict"
 
-var expect = require("chai").expect,
+var chai = require('chai'),
+	expect = chai.expect,
+	sinon = require('sinon'),
+	sinon_chai = require('sinon-chai'),
+	expect = require("chai").expect,
 	window = require('jsdom').jsdom().defaultView,
 	document = window.document,
 	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
@@ -9,6 +13,8 @@ var expect = require("chai").expect,
 	TextRegion = require('../../baseline/blocks/TextRegion'),
 	Point = require('../../baseline/selection/Point'),
 	DomPoint = require('../../baseline/selection/DomPoint')
+	
+chai.use(sinon_chai)
 	
 describe('blocks.TextRegion', function ()
 {
@@ -379,4 +385,57 @@ describe('blocks.TextRegion', function ()
 		expect(region_c_annotations[1].offset).to.equal(4)
 		expect(region_c_annotations[1].length).to.equal(2)
 	})
+	
+	it('can tell if it has a contiguous annotation matching a prototypical annotation', function ()
+	{
+		var type_a = new AnnotationType({ tag: 'foo', rank: 2 }),
+			type_b = new AnnotationType({ tag: 'bar', rank: 1 }),
+			proto_ann = new Annotation({ type: type_a, styles: { color: 'red' }, attrs: { alt: 'Foo' } }),
+			wrong_proto_ann = new Annotation({ type: type_a, styles: { color: 'red' } }),
+			region_a = new TextRegion({
+				text: 'Lorem ipsum dolor sit amet',
+				annotations: (new AnnotationTree()).concat([
+					new Annotation({ offset: 0, length: 11, type: type_a, styles: { color: 'red' }, attrs: { alt: 'Foo' } }),
+					new Annotation({ offset: 11, length: 10, type: type_b  }),
+					new Annotation({ offset: 11, length: 6, type: type_a, styles: { color: 'red' }, attrs: { alt: 'Foo' } })
+				])
+			})
+		
+		var result = region_a.has_annotation(0, 15, proto_ann)
+		expect(result).to.be.true
+		
+		result = region_a.has_annotation(0, 15, wrong_proto_ann)
+		expect(result).to.be.false
+		
+		result = region_a.has_annotation(8, 20, proto_ann)
+		expect(result).to.be.false
+	})
+
+	it('can add an annotation for a range based on a prototype annotation', sinon.test(function ()
+	{
+		var region = new TextRegion(),
+			ann = new Annotation()
+		
+		this.stub(ann, "update").returns('foo')
+		this.stub(region.annotations, "add").returns('bar')
+		
+		var new_region = region.add_annotation(5, 25, ann)
+		
+		expect(ann.update).to.have.been.calledWith({ offset: 5, length: 20 })
+		expect(region.annotations.add).to.have.been.calledWith('foo')
+		expect(new_region.annotations).to.equal('bar')
+	}))
+	
+	it('can remove all annotations in a range based on a prototype annotation', sinon.test(function ()
+	{
+		var region = new TextRegion(),
+			ann = new Annotation()
+		
+		this.stub(region.annotations, "clear").returns('bar')
+		
+		var new_region = region.remove_annotation(5, 25, ann)
+		
+		expect(region.annotations.clear).to.have.been.calledWith(5, 25, ann)
+		expect(new_region.annotations).to.equal('bar')
+	}))
 })

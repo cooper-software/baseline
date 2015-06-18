@@ -1,3 +1,5 @@
+"use strict"
+
 var Point = require('../selection/Point')
 
 module.exports = function (editor)

@@ -1,3 +1,5 @@
+"use strict"
+
 var delete_range = require('./delete_range'),
 	Point = require('../selection/Point')
 

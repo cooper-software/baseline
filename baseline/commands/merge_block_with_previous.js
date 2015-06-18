@@ -1,3 +1,5 @@
+"use strict"
+
 module.exports = function (editor)
 {
 	var range = editor.range,

@@ -107,6 +107,107 @@ module.exports = Model(
 				offset: 0
 			})
 		}
-	}
+	},
 	
-}, true)
+	has_annotation: function (start, end, prototype_annotation)
+	{
+		var start_region = this.regions[start.region]
+		
+		if (!start_region.has_annotation(start.offset, end.region == start.region ? end.offset : start_region.text.length, prototype_annotation))
+		{
+			return false
+		}
+		
+		if (end.region == start.region)
+		{
+			return true
+		}
+		
+		var end_region = this.regions[end.region]
+		
+		if (!end_region.has_annotation(0, end.offset, prototype_annotation))
+		{
+			return false
+		}
+		
+		return this.regions.slice(start.region+1, end.region).every(function (region)
+		{
+			return region.has_annotation(0, region.text.length, prototype_annotation)
+		})
+	},
+	
+	add_annotation: function (start, end, prototype_annotation)
+	{
+		return this.modify_regions_in_range(start, end, function (region, start, end)
+		{
+			return region.add_annotation(start, end, prototype_annotation)
+		})
+	},
+	
+	remove_annotation: function (start, end, prototype_annotation)
+	{
+		return this.modify_regions_in_range(start, end, function (region, start, end)
+		{
+			return region.remove_annotation(start, end, prototype_annotation)
+		})
+	},
+	
+	modify_regions_in_range: function (start, end, fn)
+	{
+		var new_regions = this.regions.slice(0, start.region)
+		
+		this.visit_regions_in_range(start, end, function (region, start, end)
+		{
+			new_regions.push(fn(region, start, end))
+			return true
+		})
+		
+		return this.update(
+		{
+			regions: new_regions.concat(this.regions.slice(end.region+1))
+		})
+	},
+	
+	visit_regions_in_range: function (start, end, fn)
+	{
+		var range_regions = this.regions.slice(start.region, end.region+1)
+		for (var i=0; i<range_regions.length; i++)
+		{
+			var region = range_regions[i]
+			
+			if (i == 0)
+			{
+				if (start.region == end.region)
+				{
+					if (!fn(region, start.offset, end.offset))
+					{
+						return false
+					}
+				}
+				else
+				{
+					if (!fn(region, start.offset, region.text.length))
+					{
+						return false
+					}
+				}
+			}
+			else if (i == range_regions.length - 1)
+			{
+				if (!fn(region, 0, end.offset))
+				{
+					return false
+				}
+			}
+			else
+			{
+				if (!fn(region, 0, region.text.length))
+				{
+					return false
+				}
+			}
+		}
+		
+		return true
+	}	
+})

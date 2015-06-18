@@ -1,9 +1,16 @@
 "use strict"
 
-var expect = require('chai').expect,
+var chai = require('chai'),
+	expect = chai.expect,
+	sinon = require('sinon'),
+	sinon_chai = require('sinon-chai'),
 	Block = require('../../baseline/blocks/Block'),
 	TextRegion = require('../../baseline/blocks/TextRegion'),
-	Point = require('../../baseline/selection/Point')
+	Point = require('../../baseline/selection/Point'),
+	Annotation = require('../../baseline/annotations/Annotation'),
+	AnnotationType = require('../../baseline/annotations/AnnotationType')
+
+chai.use(sinon_chai)
 
 describe('blocks.Block', function ()
 {
@@ -123,4 +130,148 @@ describe('blocks.Block', function ()
 		expect(result.point.region).to.equal(2)
 		expect(result.point.offset).to.equal(0)
 	})
+	
+	it('can tell if it has matching annotations continuously across a range', sinon.test(function ()
+	{
+		var block = new Block({
+				regions: [
+					new TextRegion({ text: 'Foo bar baz'}),
+					new TextRegion({ text: 'Qux quack quint' }),
+					new TextRegion({ text: 'Zux Zuack Zuint' }),
+					new TextRegion({ text: 'Xuz Kcauz Tniuz' })
+				]
+			}),
+			ann = new Annotation({ type: new AnnotationType() })
+			
+		this.stub(block.regions[0], "has_annotation").returns(true)
+		this.stub(block.regions[1], "has_annotation").returns(true)
+		this.stub(block.regions[2], "has_annotation").returns(false)
+		this.stub(block.regions[3], "has_annotation").returns(true)
+		
+		var result = block.has_annotation(
+			{ region: 0, offset: 0 },
+			{ region: 0, offset: 0 },
+			ann
+		)
+		
+		expect(result).to.be.true
+		expect(block.regions[0].has_annotation).to.have.been.called
+		expect(block.regions[0].has_annotation.args[0][0]).to.equal(0)
+		expect(block.regions[0].has_annotation.args[0][1]).to.equal(0)
+		expect(block.regions[0].has_annotation.args[0][2]).to.equal(ann)
+		
+		result = block.has_annotation(
+			{ region: 0, offset: 5 },
+			{ region: 1, offset: 20 },
+			ann
+		)
+		
+		expect(result).to.be.true
+		
+		result = block.has_annotation(
+			{ region: 1, offset: 0 },
+			{ region: 3, offset: 20 },
+			ann
+		)
+		
+		expect(result).to.be.false
+		
+		result = block.has_annotation(
+			{ region: 3, offset: 0 },
+			{ region: 3, offset: 10 },
+			ann
+		)
+		
+		expect(result).to.be.true
+	}))
+
+	it('can add annotations to a range based on a prototype annotation', sinon.test(function ()
+	{
+		var block = new Block({
+				regions: [
+					new TextRegion({ text: 'Foo bar baz'}),
+					new TextRegion({ text: 'Qux quack quint' }),
+					new TextRegion({ text: 'Zux Zuack Zuint' }),
+					new TextRegion({ text: 'Xuz Kcauz Tniuz' })
+				]
+			}),
+			proto_ann = new Annotation({ type: new AnnotationType() })
+		
+		this.stub(block.regions[0], 'add_annotation').returns('foo')
+		this.stub(block.regions[1], 'add_annotation').returns('bar')
+		this.stub(block.regions[2], 'add_annotation').returns('baz')
+		this.stub(block.regions[3], 'add_annotation').returns('qux')
+		
+		var new_block = block.add_annotation(
+			{ region: 0, offset: 4 },
+			{ region: 2, offset: 3 },
+			proto_ann
+		)
+		
+		expect(block.regions[0].add_annotation).to.have.been.called
+		expect(block.regions[1].add_annotation).to.have.been.called
+		expect(block.regions[2].add_annotation).to.have.been.called
+		expect(block.regions[3].add_annotation).to.not.have.been.called
+		
+		expect(block.regions[0].add_annotation.args[0][0]).to.equal(4)
+		expect(block.regions[0].add_annotation.args[0][1]).to.equal(11)
+		expect(block.regions[0].add_annotation.args[0][2]).to.equal(proto_ann)
+		expect(block.regions[1].add_annotation.args[0][0]).to.equal(0)
+		expect(block.regions[1].add_annotation.args[0][1]).to.equal(15)
+		expect(block.regions[1].add_annotation.args[0][2]).to.equal(proto_ann)
+		expect(block.regions[2].add_annotation.args[0][0]).to.equal(0)
+		expect(block.regions[2].add_annotation.args[0][1]).to.equal(3)
+		expect(block.regions[2].add_annotation.args[0][2]).to.equal(proto_ann)
+		
+		expect(new_block.regions.length).to.equal(4)
+		expect(new_block.regions[0]).to.equal('foo')
+		expect(new_block.regions[1]).to.equal('bar')
+		expect(new_block.regions[2]).to.equal('baz')
+		expect(new_block.regions[3]).to.equal(block.regions[3])
+	}))
+	
+	it('can remove annotations in a range that match a prototype annotation', sinon.test(function ()
+	{
+		var block = new Block({
+				regions: [
+					new TextRegion({ text: 'Foo bar baz'}),
+					new TextRegion({ text: 'Qux quack quint' }),
+					new TextRegion({ text: 'Zux Zuack Zuint' }),
+					new TextRegion({ text: 'Xuz Kcauz Tniuz' })
+				]
+			}),
+			proto_ann = new Annotation({ type: new AnnotationType() })
+		
+		this.stub(block.regions[0], 'remove_annotation').returns('foo')
+		this.stub(block.regions[1], 'remove_annotation').returns('bar')
+		this.stub(block.regions[2], 'remove_annotation').returns('baz')
+		this.stub(block.regions[3], 'remove_annotation').returns('qux')
+		
+		var new_block = block.remove_annotation(
+			{ region: 0, offset: 4 },
+			{ region: 2, offset: 3 },
+			proto_ann
+		)
+		
+		expect(block.regions[0].remove_annotation).to.have.been.called
+		expect(block.regions[1].remove_annotation).to.have.been.called
+		expect(block.regions[2].remove_annotation).to.have.been.called
+		expect(block.regions[3].remove_annotation).to.not.have.been.called
+		
+		expect(block.regions[0].remove_annotation.args[0][0]).to.equal(4)
+		expect(block.regions[0].remove_annotation.args[0][1]).to.equal(11)
+		expect(block.regions[0].remove_annotation.args[0][2]).to.equal(proto_ann)
+		expect(block.regions[1].remove_annotation.args[0][0]).to.equal(0)
+		expect(block.regions[1].remove_annotation.args[0][1]).to.equal(15)
+		expect(block.regions[1].remove_annotation.args[0][2]).to.equal(proto_ann)
+		expect(block.regions[2].remove_annotation.args[0][0]).to.equal(0)
+		expect(block.regions[2].remove_annotation.args[0][1]).to.equal(3)
+		expect(block.regions[2].remove_annotation.args[0][2]).to.equal(proto_ann)
+		
+		expect(new_block.regions.length).to.equal(4)
+		expect(new_block.regions[0]).to.equal('foo')
+		expect(new_block.regions[1]).to.equal('bar')
+		expect(new_block.regions[2]).to.equal('baz')
+		expect(new_block.regions[3]).to.equal(block.regions[3])
+	}))
 })

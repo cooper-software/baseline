@@ -217,7 +217,6 @@ Editor.prototype.selectionchange_handler = function (evt)
 	
 Editor.prototype.paste_handler = function (evt)
 {
-	console.log(evt)
 	evt.preventDefault()
 }
 

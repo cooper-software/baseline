@@ -73,18 +73,12 @@ module.exports = Model(
 		})
 	},
 	
-	remove: function (start, end, type)
+	remove: function (start, end)
 	{
 		var new_annotations = []
 		
 		this.root.walk(function (ann)
 		{
-			if (type && ann.type != type)
-			{
-				new_annotations.push(ann)
-				return
-			}
-			
 			var ann_start = ann.offset,
 				ann_end = ann.end(),
 				length = end - start
@@ -122,6 +116,65 @@ module.exports = Model(
 					var new_ann = ann.update(
 					{
 						offset: start,
+						length: ann_end - end
+					})
+					
+					if (new_ann.length > 0)
+					{
+						new_annotations.push(new_ann)
+					}
+				}
+			}
+		})
+		
+		return this.set(new_annotations)
+	},
+	
+	clear: function (start, end, prototype)
+	{
+		var new_annotations = []
+		
+		this.root.walk(function (ann)
+		{
+			if (prototype && !Model.equals(ann, prototype, ['type', 'attrs', 'styles']))
+			{
+				new_annotations.push(ann)
+				return
+			}
+			
+			var ann_start = ann.offset,
+				ann_end = ann.end(),
+				length = end - start
+			
+			if (ann_end <= start)
+			{
+				new_annotations.push(ann)
+			}
+			else if (ann_start >= end)
+			{
+				new_annotations.push(ann)
+			}
+			else
+			{
+				if (ann_start <= start)
+				{
+					var new_ann = ann.update(
+					{
+						offset: ann_start,
+						length: start - ann_start
+					})
+					
+					if (new_ann.length > 0)
+					{
+						new_annotations.push(new_ann)
+					}
+				}
+				
+				if (ann_end >= end)
+				{
+					var new_ann = ann.update(
+					{
+						offset: end,
 						length: ann_end - end
 					})
 					

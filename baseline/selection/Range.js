@@ -53,6 +53,16 @@ var Range = Model(
 		{
 			end: this.start
 		})
+	},
+	
+	map: function (blocks, fn)
+	{
+		var results = []
+		this.visit(blocks, function (block, start, end)
+		{
+			results.push(fn(block, start, end))
+			return true
+		})
 	}
 })
 

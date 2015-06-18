@@ -2,43 +2,51 @@ var AnnotationType = require('./annotations/AnnotationType'),
 	ListBlock = require('./blocks/ListBlock'),
 	FigureBlock = require('./blocks/FigureBlock')
 
-module.exports = 
-{
-	annotation_types: [
-		new AnnotationType({
+var annotation_types_by_name = {
+		code: new AnnotationType({
 			rank: -10,
 			tag: 'CODE'
 		}),
-		new AnnotationType({
+		link: new AnnotationType({
 			rank: 0,
 			tag: 'A',
 			attrs: new Set(['href', 'title', 'target', 'rel'])
 		}),
-		new AnnotationType({
+		bold: new AnnotationType({
 			rank: 10,
 			tag: 'B',
 			tag_aliases: new Set(['STRONG'])
 		}),
-		new AnnotationType({
+		italic: new AnnotationType({
 			rank: 20,
 			tag: 'EM',
 			tag_aliases: new Set(['I'])
 		}),
-		new AnnotationType({
+		underline: new AnnotationType({
 			rank: 30,
 			tag: 'U'
 		}),
-		new AnnotationType({
+		strikethru: new AnnotationType({
 			rank: 40,
 			tag: 'S',
 			tag_aliases: new Set(['STRIKE', 'DEL'])
 		}),
-		new AnnotationType({
+		color: new AnnotationType({
 			rank: 50,
 			tag: 'span',
 			styles: new Set(['color'])
 		})
-	],
+}
+
+var annotation_types_list = Object.keys(annotation_types_by_name).map(function (k)
+{
+	return annotation_types_by_name[k]
+})
+
+module.exports = 
+{
+	annotation_types: annotation_types_list,
+	named_annotation_types: annotation_types_by_name,
 	
 	block_recognizers: [
 		ListBlock.recognize,
@@ -49,6 +57,7 @@ module.exports =
 	{
 		merge_block_with_previous: require('./commands/merge_block_with_previous'),
 		delete_range: require('./commands/delete_range'),
-		insert_block: require('./commands/insert_block')
+		insert_block: require('./commands/insert_block'),
+		toggle_annotation: require('./commands/toggle_annotation')
 	}
 }

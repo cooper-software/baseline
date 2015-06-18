@@ -174,4 +174,29 @@ describe("annotations.AnnotationTreeNode", function ()
 		expect(node.children[1].children[0].children[0].annotation.offset).to.equal(13)
 		expect(node.children[1].children[0].children[0].annotation.length).to.equal(4)
 	})
+	
+	it('can check if a condition holds continuously across a range', function ()
+	{
+		var foo = new AnnotationType({ tag: 'FOO', rank: 0 }),
+			bar = new AnnotationType({ tag: 'BAR', rank: 10 }),
+			node = (new AnnotationTreeNode()).concat([
+				new Annotation({ type: bar, offset: 0, length: 8 }),
+				new Annotation({ type: foo, offset: 8, length: 5 }),
+				new Annotation({ type: bar, offset: 8, length: 3 })
+			].map(function (ann) { return new AnnotationTreeNode({ annotation: ann }) }))
+		
+		var result = node.has_contiguous_condition(0, 10, function (ann)
+		{
+			return ann.type == bar
+		})
+		
+		expect(result).to.be.true
+		
+		result = node.has_contiguous_condition(5, 18, function (ann)
+		{
+			return ann.type == bar
+		})
+		
+		expect(result).to.be.false
+	})
 })
