@@ -19,7 +19,7 @@ var FigureBlock = Model.extend(Block,
 	render: function ()
 	{
 		return h(
-			'figure', 
+			'figure',
 			[
 				h('img', {
 					src: this.src,

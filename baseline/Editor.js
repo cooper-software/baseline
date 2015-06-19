@@ -31,6 +31,8 @@ var Editor = function Editor(options)
 	this.container.addEventListener('keyup', this.keyup_handler.bind(this))
 	this.container.addEventListener('paste', this.paste_handler.bind(this))
 	this.dom_document.addEventListener('selectionchange', this.selectionchange_handler.bind(this))
+	this.container.addEventListener('click', this.click_handler.bind(this))
+	this.selection_changed = false
 	
 	this.parser = new Parser({
 		block_recognizers: defaults.block_recognizers,
@@ -216,11 +218,30 @@ Editor.prototype.keyup_handler = function (evt)
 
 Editor.prototype.selectionchange_handler = function (evt)
 {
+	this.selection_changed = true
 	this.update_range_from_window()
 	
 	if (this.onselectionchange)
 	{
 		this.onselectionchange(this)
+	}
+}
+
+Editor.prototype.click_handler = function (evt)
+{
+	if (!this.selection_changed)
+	{
+		var range = window.document.createRange()
+		range.setStart(evt.target, 0)
+		range.setEnd(evt.target, 0)
+		
+		var selection = window.getSelection()
+		selection.removeAllRanges()
+		selection.addRange(range)
+	}
+	else
+	{
+		this.selection_changed = false
 	}
 }
 	

@@ -31,6 +31,10 @@ var revision = document.getElementById('revision'),
 			{
 				buttons.redo.setAttribute('disabled', 'true')
 			}
+		},
+		onselectionchange: function ()
+		{
+			console.log(editor.range.start.block)
 		}
 	})
 
