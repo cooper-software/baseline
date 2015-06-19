@@ -8,6 +8,7 @@ var chai = require('chai'),
 	window = require('jsdom').jsdom().defaultView,
 	document = window.document,
 	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
+	AnnotationTreeNode = require('../../baseline/annotations/AnnotationTree'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType'),
 	TextRegion = require('../../baseline/blocks/TextRegion'),
@@ -390,8 +391,8 @@ describe('blocks.TextRegion', function ()
 	{
 		var type_a = new AnnotationType({ tag: 'foo', rank: 2 }),
 			type_b = new AnnotationType({ tag: 'bar', rank: 1 }),
-			proto_ann = new Annotation({ type: type_a, styles: { color: 'red' }, attrs: { alt: 'Foo' } }),
-			wrong_proto_ann = new Annotation({ type: type_a, styles: { color: 'red' } }),
+			proto_ann = new Annotation({ type: type_a }),
+			wrong_proto_ann = new Annotation({ type: type_b }),
 			region_a = new TextRegion({
 				text: 'Lorem ipsum dolor sit amet',
 				annotations: (new AnnotationTree()).concat([

@@ -1,5 +1,11 @@
 module.exports = 
 {
+	vdom: require('./vdom'),
+	defaults: require('./defaults'),
 	Editor: require('./Editor'),
-	vdom: require('./vdom')
+	Document: require('./Document'),
+	Range: require('./selection/Range'),
+	Point: require('./selection/Point'),
+	AnnotationType: require('./annotations/AnnotationType'),
+	Annotation: require('./annotations/Annotation')
 }

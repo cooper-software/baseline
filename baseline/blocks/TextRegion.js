@@ -50,7 +50,7 @@ module.exports = Model(
 	{
 		return this.annotations.has_contiguous_condition(start, end, function (annotation)
 		{
-			return Model.equals(annotation, prototype_annotation, ['type', 'attrs', 'styles'])
+			return Model.equals(annotation, prototype_annotation, ['type'])
 		})
 	},
 	

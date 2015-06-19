@@ -39,12 +39,14 @@ describe('annotations.Annotation', function ()
 	{
 		var a = new Annotation({ offset: 0, length: 5 }),
 			b = new Annotation({ offset: 3, length: 1 }),
-			c = new Annotation({ offset: 3, length: 18 })
+			c = new Annotation({ offset: 3, length: 18 }),
+			d = new Annotation({ offset: 3, length: 2 })
 		
 		expect(a.contains(b)).to.be.true
 		expect(a.contains(c)).to.be.false
 		expect(a.contains(1, 4)).to.be.true
 		expect(a.contains(10, 5)).to.be.false
+		expect(c.contains(d)).to.be.true
 	})
 	
 	it('can get the union with another annotation or range', function ()

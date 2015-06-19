@@ -121,7 +121,7 @@ module.exports = Model(
 		//     B(5,9)
 		// B(9,13)
 		
-		if (this.annotation.offset < other.annotation.offset)
+		if (this.annotation.offset <= other.annotation.offset)
 		{
 			return [
 				this.insert(
@@ -130,7 +130,7 @@ module.exports = Model(
 				other.truncate(this.annotation.end(), other.annotation.end())
 			]
 		}
-		else if (other.annotation.offset < this.annotation.offset)
+		else
 		{
 			return [
 				other.truncate(other.annotation.offset, this.annotation.offset),
@@ -204,7 +204,7 @@ module.exports = Model(
 			return false
 		}
 		
-		return Model.equals(this.annotation, other.annotation, ['type', 'attrs', 'styles'])
+		return Model.equals(this.annotation, other.annotation, ['type'])
 	},
 	
 	concat: function (nodes)

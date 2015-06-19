@@ -169,6 +169,13 @@ Parser.prototype.parse_region_node_properties = function (vnode)
 					props.styles[match[1]] = match[2]
 				}
 		}
+		else if (k == 'attributes')
+		{
+			Object.keys(vnode.properties.attributes).forEach(function (kk)
+			{
+				props.attrs[kk] = vnode.properties.attributes[kk]
+			})
+		}
 		else
 		{
 			props.attrs[k] = vnode.properties[k]

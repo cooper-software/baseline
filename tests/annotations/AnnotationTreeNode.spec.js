@@ -174,6 +174,154 @@ describe("annotations.AnnotationTreeNode", function ()
 		expect(node.children[1].children[0].children[0].annotation.offset).to.equal(13)
 		expect(node.children[1].children[0].children[0].annotation.length).to.equal(4)
 	})
+
+	it('handles insertion of an overlapping annotation of a lower rank', function ()
+	{
+		var link = new AnnotationType({ tag: 'a', rank: 0 }),
+			bold = new AnnotationType({ tag: 'b', rank: 1 }),
+			italic = new AnnotationType({ tag: 'i', rank: 2 }),
+			node = new AnnotationTreeNode(
+			{
+				children: [
+					new AnnotationTreeNode(
+					{
+						annotation: new Annotation(
+						{
+							offset: 13,
+							length: 4,
+							type: link
+						}),
+						children: [
+							new AnnotationTreeNode(
+							{
+								annotation: new Annotation(
+								{
+									offset: 13,
+									length: 4,
+									type: italic
+								})
+							})
+						]
+					})
+				]
+			})
+		
+		var new_node = node.insert(
+			new AnnotationTreeNode(
+			{
+				annotation: new Annotation(
+				{
+					offset: 9,
+					length: 6,
+					type: bold
+				})
+			})
+		)
+		
+		expect(new_node.children.length).to.equal(2)
+		
+		expect(new_node.children[0].annotation.offset).to.equal(9)
+		expect(new_node.children[0].annotation.length).to.equal(4)
+		expect(new_node.children[0].annotation.type).to.equal(bold)
+		expect(new_node.children[0].children.length).to.equal(0)
+		
+		expect(new_node.children[1].annotation.offset).to.equal(13)
+		expect(new_node.children[1].annotation.length).to.equal(4)
+		expect(new_node.children[1].annotation.type).to.equal(link)
+		expect(new_node.children[1].children.length).to.equal(2)
+		
+		expect(new_node.children[1].children[0].annotation.offset).to.equal(13)
+		expect(new_node.children[1].children[0].annotation.length).to.equal(2)
+		expect(new_node.children[1].children[0].annotation.type).to.equal(bold)
+		expect(new_node.children[1].children[0].children.length).to.equal(1)
+		
+		expect(new_node.children[1].children[0].children[0].annotation.offset).to.equal(13)
+		expect(new_node.children[1].children[0].children[0].annotation.length).to.equal(2)
+		expect(new_node.children[1].children[0].children[0].annotation.type).to.equal(italic)
+		expect(new_node.children[1].children[0].children[0].children.length).to.equal(0)
+		
+		expect(new_node.children[1].children[1].annotation.offset).to.equal(15)
+		expect(new_node.children[1].children[1].annotation.length).to.equal(2)
+		expect(new_node.children[1].children[1].annotation.type).to.equal(italic)
+		expect(new_node.children[1].children[1].children.length).to.equal(0)
+	})
+
+	it('handles insertion of a containing annotation of a lower rank', function ()
+	{
+		var link = new AnnotationType({ tag: 'a', rank: 0 }),
+			bold = new AnnotationType({ tag: 'b', rank: 1 }),
+			italic = new AnnotationType({ tag: 'i', rank: 2 }),
+			node = new AnnotationTreeNode(
+			{
+				children: [
+					new AnnotationTreeNode(
+					{
+						annotation: new Annotation(
+						{
+							offset: 13,
+							length: 4,
+							type: link
+						}),
+						children: [
+							new AnnotationTreeNode(
+							{
+								annotation: new Annotation(
+								{
+									offset: 13,
+									length: 4,
+									type: bold
+								}),
+								children: [
+									new AnnotationTreeNode(
+									{
+										annotation: new Annotation(
+										{
+											offset: 13,
+											length: 4,
+											type: italic
+										})
+									})
+								]
+							})
+						]
+					})
+				]
+			})
+		
+		var new_node = node.insert(
+			new AnnotationTreeNode(
+			{
+				annotation: new Annotation(
+				{
+					offset: 0,
+					length: 17,
+					type: bold
+				})
+			})
+		)
+		
+		expect(new_node.children.length).to.equal(2)
+		
+		expect(new_node.children[0].annotation.offset).to.equal(0)
+		expect(new_node.children[0].annotation.length).to.equal(13)
+		expect(new_node.children[0].annotation.type).to.equal(bold)
+		expect(new_node.children[0].children.length).to.equal(0)
+		
+		expect(new_node.children[1].annotation.offset).to.equal(13)
+		expect(new_node.children[1].annotation.length).to.equal(4)
+		expect(new_node.children[1].annotation.type).to.equal(link)
+		expect(new_node.children[1].children.length).to.equal(1)
+		
+		expect(new_node.children[1].children[0].annotation.offset).to.equal(13)
+		expect(new_node.children[1].children[0].annotation.length).to.equal(4)
+		expect(new_node.children[1].children[0].annotation.type).to.equal(bold)
+		expect(new_node.children[1].children[0].children.length).to.equal(1)
+		
+		expect(new_node.children[1].children[0].children[0].annotation.offset).to.equal(13)
+		expect(new_node.children[1].children[0].children[0].annotation.length).to.equal(4)
+		expect(new_node.children[1].children[0].children[0].annotation.type).to.equal(italic)
+		expect(new_node.children[1].children[0].children[0].children.length).to.equal(0)
+	})
 	
 	it('can check if a condition holds continuously across a range', function ()
 	{

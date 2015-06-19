@@ -36,3 +36,18 @@ var revision = document.getElementById('revision'),
 
 buttons.undo.addEventListener('click', editor.undo.bind(editor))
 buttons.redo.addEventListener('click', editor.redo.bind(editor))
+
+;['bold', 'italic', 'underline'].forEach(function (n)
+{
+	var prototype_annotation = new baseline.Annotation({
+		type: baseline.defaults.named_annotation_types[n]
+	})
+	
+	buttons[n].addEventListener('click', function ()
+	{
+		editor.run_command(
+			editor.commands.toggle_annotation,
+			prototype_annotation
+		)
+	})
+})

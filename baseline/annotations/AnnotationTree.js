@@ -136,7 +136,7 @@ module.exports = Model(
 		
 		this.root.walk(function (ann)
 		{
-			if (prototype && !Model.equals(ann, prototype, ['type', 'attrs', 'styles']))
+			if (prototype && !Model.equals(ann, prototype, ['type']))
 			{
 				new_annotations.push(ann)
 				return

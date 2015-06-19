@@ -95,7 +95,12 @@ Editor.prototype.onblockchange = function (i, new_block)
 
 Editor.prototype.update_document = function (props)
 {
-	this.document = this.document.update(props)
+	this.set_document(this.document.update(props))
+}
+
+Editor.prototype.set_document = function (doc)
+{
+	this.document = doc
 	this.changes.push(this.document)
 	
 	if (this.ondocumentchange)
@@ -151,9 +156,13 @@ Editor.prototype.update_range_from_window = function ()
 	this.range = Range.get_from_window(this.dom_window, this.container, this.document)
 }
 
-Editor.prototype.run_command = function (command)
+Editor.prototype.run_command = function ()
 {
-	command(this)
+	var command = arguments[0],
+		args = Array.prototype.slice.call(arguments, 1)
+	
+	args.unshift(this)
+	command.apply(null, args)
 	this.render()
 	this.range.set_in_window(this.dom_window, this.container, this.document)
 }

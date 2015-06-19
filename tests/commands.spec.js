@@ -173,22 +173,23 @@ describe('baseline.commands', function ()
 			end: new Point({ block: 1, region: 0, offset: 4 })
 		})
 		
-		var proto_ann = new Annotation({ type: defaults.named_annotation_types.bold })
+		var proto_ann = new Annotation({ type: defaults.named_annotation_types.bold }),
+			orig_doc = editor.document
 		
-		this.stub(editor.document, "has_annotation").returns(true)
-		this.stub(editor.document, "add_annotation").returns('foo')
-		this.stub(editor.document, "remove_annotation").returns('bar')
+		this.stub(orig_doc, "has_annotation").returns(true)
+		this.stub(orig_doc, "add_annotation").returns('foo')
+		this.stub(orig_doc, "remove_annotation").returns('bar')
 		
 		editor.commands.toggle_annotation(editor, proto_ann)
 		
-		expect(editor.document.has_annotation).to.have.been.called
-		expect(editor.document.has_annotation.args[0][0]).to.equal(editor.range)
-		expect(editor.document.has_annotation.args[0][1]).to.equal(proto_ann)
+		expect(orig_doc.has_annotation).to.have.been.called
+		expect(orig_doc.has_annotation.args[0][0]).to.equal(editor.range)
+		expect(orig_doc.has_annotation.args[0][1]).to.equal(proto_ann)
 		
-		expect(editor.document.add_annotation).to.not.have.been.called
+		expect(orig_doc.add_annotation).to.not.have.been.called
 		
-		expect(editor.document.remove_annotation).to.have.been.called
-		expect(editor.document.remove_annotation.args[0][0]).to.equal(editor.range)
-		expect(editor.document.remove_annotation.args[0][1]).to.equal(proto_ann)
+		expect(orig_doc.remove_annotation).to.have.been.called
+		expect(orig_doc.remove_annotation.args[0][0]).to.equal(editor.range)
+		expect(orig_doc.remove_annotation.args[0][1]).to.equal(proto_ann)
 	}))
 })
