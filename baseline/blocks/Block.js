@@ -1,7 +1,8 @@
 "use strict"
 
 var Model = require('../Model'),
-	DomPoint = require('../selection/DomPoint')
+	DomPoint = require('../selection/DomPoint'),
+	Point = require('../selection/Point')
 
 module.exports = Model(
 {
@@ -14,14 +15,52 @@ module.exports = Model(
 		return null
 	},
 	
+	// Convert a list of blocks from a different type to this type
+	convert: function (tuples)
+	{
+		var new_blocks = [],
+			point_block = tuples[0][1].block
+		
+		tuples.forEach(function (tuple)
+		{
+			var block = tuple[0], start = tuple[1], end = tuple[2],
+				start_regions = block.regions.slice(0, start.region),
+				change_regions = block.regions.slice(start.region, end.region+1),
+				end_regions = block.regions.slice(end.region+1)
+			
+			if (start_regions.length > 0)
+			{
+				new_blocks.push(block.update({ regions: start_regions }))
+				point_block++
+			}
+			
+			new_blocks.push(this.update({ regions: change_regions }))
+			
+			if (end_regions.length > 0)
+			{
+				new_blocks.push(block.update({ regions: end_regions }))
+			}
+			
+		}.bind(this))
+		
+		return {
+			blocks: new_blocks,
+			point: {
+				block: point_block,
+				region: 0,
+				offset: 0
+			}
+		}
+	},
+	
 	// Given the DOM node associated with this block and a DomPoint within it,
 	// return the region index and character offset that match the DomPoint
 	get_position_of_dom_point: function (block_node, dom_point)
 	{
-		return {
+		return new Point({
 			region: 0,
 			offset: 0
-		}
+		})
 	},
 	
 	// Given a selection.Point, return the corresponding DomPoint within this block's DOM node.
@@ -101,7 +140,7 @@ module.exports = Model(
 					regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
 				})
 			],
-			point: point.update({
+			point: new Point({
 				block: point.block + 1,
 				region: point.region + 1,
 				offset: 0

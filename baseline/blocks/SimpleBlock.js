@@ -12,7 +12,7 @@ module.exports = Model.extend(Block,
 	
 	render: function ()
 	{
-		return h(this.tag, { key: this._id },  this.regions[0].text == '' ? [ h('br') ] : this.regions[0].render())
+		return h(this.tag, this.regions[0].text == '' ? h('br') : this.regions[0].render())
 	},
 	
 	get_position_of_dom_point: function (block_node, dom_point)

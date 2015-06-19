@@ -32,7 +32,7 @@ describe('blocks.Block', function ()
 	{
 		var block = new Block()
 		expect(block.get_position_of_dom_point).to.be.defined
-		expect(block.get_position_of_dom_point()).to.deep.equal({ region: 0, offset: 0 })
+		expect(block.get_position_of_dom_point()).to.deep.equal(new Point({ region: 0, offset: 0 }))
 	})
 	
 	it('has a method to get the dom point for a selection.Point', function ()

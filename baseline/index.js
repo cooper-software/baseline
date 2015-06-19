@@ -7,5 +7,7 @@ module.exports =
 	Range: require('./selection/Range'),
 	Point: require('./selection/Point'),
 	AnnotationType: require('./annotations/AnnotationType'),
-	Annotation: require('./annotations/Annotation')
+	Annotation: require('./annotations/Annotation'),
+	SimpleBlock: require('./blocks/SimpleBlock'),
+	ListBlock: require('./blocks/ListBlock')
 }

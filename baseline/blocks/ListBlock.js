@@ -25,6 +25,19 @@ var ListBlock = Model.extend(Block,
 		)
 	},
 	
+	convert: function (tuples)
+	{
+		var regions = []
+		tuples.forEach(function (tuple)
+		{
+			regions = regions.concat(tuple[0].regions)
+		})
+		return {
+			blocks: [ this.update({ regions: regions }) ],
+			point: tuples[0][1]
+		}
+	},
+	
 	insert: function (point)
 	{
 		// assert(point.region >= 0 && point.region < this.regions.length &&

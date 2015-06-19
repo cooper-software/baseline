@@ -1,6 +1,12 @@
 var revision = document.getElementById('revision'),
 	buttons =
 	{
+		normal: document.getElementById('action-normal'),
+		h1: document.getElementById('action-h1'),
+		h2: document.getElementById('action-h2'),
+		h3: document.getElementById('action-h3'),
+		ol: document.getElementById('action-ol'),
+		ul: document.getElementById('action-ul'),
 		bold: document.getElementById('action-bold'),
 		italic: document.getElementById('action-italic'),
 		underline: document.getElementById('action-underline'),
@@ -31,15 +37,44 @@ var revision = document.getElementById('revision'),
 			{
 				buttons.redo.setAttribute('disabled', 'true')
 			}
-		},
-		onselectionchange: function ()
-		{
-			console.log(editor.range.start.block)
 		}
 	})
 
 buttons.undo.addEventListener('click', editor.undo.bind(editor))
 buttons.redo.addEventListener('click', editor.redo.bind(editor))
+
+var normal_block = new baseline.SimpleBlock({ tag: 'P' })
+buttons.normal.addEventListener('click', function ()
+{
+	editor.run_command(
+		editor.commands.set_block_type,
+		normal_block
+	)
+})
+
+;['h1', 'h2', 'h3'].forEach(function (n)
+{
+	var prototype_block = new baseline.SimpleBlock({ tag: n.toUpperCase() })
+	buttons[n].addEventListener('click', function ()
+	{
+		editor.run_command(
+			editor.commands.set_block_type,
+			prototype_block
+		)
+	})
+})
+
+;['ul', 'ol'].forEach(function (n)
+{
+	var prototype_block = new baseline.ListBlock({ list_tag: n.toUpperCase() })
+	buttons[n].addEventListener('click', function ()
+	{
+		editor.run_command(
+			editor.commands.set_block_type,
+			prototype_block
+		)
+	})
+})
 
 ;['bold', 'italic', 'underline'].forEach(function (n)
 {

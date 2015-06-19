@@ -160,6 +160,11 @@ Editor.prototype.update_range_from_window = function ()
 
 Editor.prototype.run_command = function ()
 {
+	if (!this.range)
+	{
+		return
+	}
+	
 	var command = arguments[0],
 		args = Array.prototype.slice.call(arguments, 1)
 	
