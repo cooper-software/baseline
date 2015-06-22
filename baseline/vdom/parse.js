@@ -1,6 +1,6 @@
 "use strict"
 
-var model = require('./Model')
+var model = require('./model')
 
 function parse (node, should_map_nodes)
 {
