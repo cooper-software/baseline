@@ -7,7 +7,7 @@ var chai = require('chai'),
 	Model = require('../../baseline/Model'),
 	Block = require('../../baseline/blocks/Block'),
 	SimpleBlock = require('../../baseline/blocks/SimpleBlock'),
-	TextRegion = require('../../baseline/blocks/TextRegion')
+	TextRegion = require('../../baseline/regions/TextRegion')
 	
 chai.use(sinon_chai)
 

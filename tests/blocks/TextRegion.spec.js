@@ -11,7 +11,7 @@ var chai = require('chai'),
 	AnnotationTreeNode = require('../../baseline/annotations/AnnotationTree'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType'),
-	TextRegion = require('../../baseline/blocks/TextRegion'),
+	TextRegion = require('../../baseline/regions/TextRegion'),
 	Point = require('../../baseline/selection/Point'),
 	DomPoint = require('../../baseline/selection/DomPoint')
 	

@@ -3,7 +3,7 @@
 var vdom = require('./vdom'),
 	h = vdom.h,
 	SimpleBlock = require('./blocks/SimpleBlock'),
-	TextRegion = require('./blocks/TextRegion'),
+	TextRegion = require('./regions/TextRegion'),
 	Annotation = require('./annotations/Annotation'),
 	AnnotationTree = require('./annotations/AnnotationTree')
 

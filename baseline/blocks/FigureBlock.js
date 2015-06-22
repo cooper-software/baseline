@@ -3,7 +3,7 @@
 var h = require('../vdom').h,
 	Model = require('../Model'),
 	Block = require('./Block'),
-	TextRegion = require('./TextRegion')
+	TextRegion = require('../regions/TextRegion')
 
 var FigureBlock = Model.extend(Block,
 {

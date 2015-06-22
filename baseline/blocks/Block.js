@@ -96,29 +96,57 @@ module.exports = Model(
 		})
 	},
 	
-	append: function (block)
+	append_to: function (block)
 	{
-		var last_region = this.last_region(),
-			first_region = block.regions[0]
+		var first_region = this.regions[0],
+			last_region = block.last_region()
 		
 		var new_blocks = [
-			this.update({
-				regions: this.regions
-								.slice(0, this.regions.length - 1)
+			block.update({
+				regions: block.regions
+								.slice(0, block.regions.length - 1)
 								.concat([ last_region.append(first_region) ])
 			})
 		]
 		
-		if (block.regions.length > 1)
+		if (this.regions.length > 1)
 		{
 			new_blocks.push(
-				block.update({
-					regions: block.regions.slice(1)
+				this.update({
+					regions: this.regions.slice(1)
 				})
 			)
 		}
 		
 		return new_blocks
+	},
+	
+	delete_at_boundary: function (point)
+	{
+		// assert(point.region > 0 && point.region < this.regions.length)
+		var previous_region = this.regions[point.region-1]
+		
+		return {
+			blocks: [
+				this.update(
+				{
+					regions: this.regions
+								.slice(0, point.region-1)
+								.concat([
+									previous_region
+										.append(this.regions[point.region])
+								])
+								.concat(
+									this.regions.slice(point.region+1)
+								)
+				})
+			],
+			point: new Point({
+				block: point.block,
+				region: point.region-1,
+				offset: previous_region.text.length
+			})
+		}
 	},
 	
 	last_region: function ()

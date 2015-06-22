@@ -5,7 +5,7 @@ var chai = require('chai'),
 	sinon = require('sinon'),
 	sinon_chai = require('sinon-chai'),
 	Block = require('../../baseline/blocks/Block'),
-	TextRegion = require('../../baseline/blocks/TextRegion'),
+	TextRegion = require('../../baseline/regions/TextRegion'),
 	Point = require('../../baseline/selection/Point'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType')
@@ -79,7 +79,7 @@ describe('blocks.Block', function ()
 		expect(changed_block.regions[0].text).to.equal('This is the third region')
 	})
 	
-	it('can append another block to its end', function ()
+	it('can be appended to another block', function ()
 	{
 		var block_a = new Block({
 				regions: [
@@ -93,7 +93,7 @@ describe('blocks.Block', function ()
 					new TextRegion({ text: 'This is the third region' })
 				]
 			}),
-			result = block_a.append(block_b)
+			result = block_b.append_to(block_a)
 		
 		expect(block_a.regions.length).to.equal(2)
 		expect(block_a.regions[0].text).to.equal('Text region one')

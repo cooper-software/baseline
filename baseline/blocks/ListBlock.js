@@ -4,7 +4,7 @@ var h = require('../vdom').h,
 	Model = require('../Model'),
 	Block = require('./Block'),
 	SimpleBlock = require('./SimpleBlock'),
-	TextRegion = require('./TextRegion'),
+	TextRegion = require('../regions/TextRegion'),
 	DomPoint = require('../selection/DomPoint')
 
 var ListBlock = Model.extend(Block,

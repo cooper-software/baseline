@@ -11,7 +11,7 @@ var chai = require('chai'),
 	Point = require('../../baseline/selection/Point'),
 	DomPoint = require('../../baseline/selection/DomPoint'),
 	SimpleBlock = require('../../baseline/blocks/SimpleBlock'),
-	TextRegion = require('../../baseline/blocks/TextRegion'),
+	TextRegion = require('../../baseline/regions/TextRegion'),
 	Document = require('../../baseline/Document')
 	
 chai.use(sinon_chai)

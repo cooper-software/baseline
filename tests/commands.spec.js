@@ -107,12 +107,12 @@ describe('baseline.commands', function ()
 		
 		var block_to_merge_with = editor.document.blocks[0],
 			block_to_merge = editor.document.blocks[1]
-		sinon.spy(block_to_merge_with, "append")
+		sinon.spy(block_to_merge, "append_to")
 		editor.range.set_in_window(window, container, editor.document)
-		editor.commands.merge_block_with_previous(editor)
+		editor.commands.delete_at_boundary(editor)
 		editor.range.set_in_window(window, container, editor.document)
 		
-		expect(block_to_merge_with.append).to.have.been.calledWith(block_to_merge)
+		expect(block_to_merge.append_to).to.have.been.calledWith(block_to_merge_with)
 		var blocks = editor.document.blocks
 		expect(blocks.length).to.equal(1)
 		expect(blocks[0].regions[0].text).to.equal('This is block one.This was block two.')
@@ -122,7 +122,7 @@ describe('baseline.commands', function ()
 		expect(editor.range.start.offset).to.equal(18)
 	})
 
-	it('merges regions within a block when merge_block_with_previous() is called for a region that is not the first', function ()
+	it('merges regions within a block when delete_at_boundary() is called for a region that is not the first', function ()
 	{
 		var container = document.createElement('div')
 		container.innerHTML = '<ul><li>Foo</li><li>Bar</li><li>Baz</li></ul>'
@@ -142,7 +142,7 @@ describe('baseline.commands', function ()
 			region_to_merge = editor.document.blocks[0].regions[1]
 		sinon.spy(region_to_merge_with, "append")
 		editor.range.set_in_window(window, container, editor.document)
-		editor.commands.merge_block_with_previous(editor)
+		editor.commands.delete_at_boundary(editor)
 		editor.range.set_in_window(window, container, editor.document)
 		
 		expect(region_to_merge_with.append).to.have.been.calledWith(region_to_merge)

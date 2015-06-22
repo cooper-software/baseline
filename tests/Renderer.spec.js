@@ -9,7 +9,7 @@ var chai = require('chai'),
 	Renderer = require('../baseline/Renderer'),
 	vdom = require('../baseline/vdom'),
 	SimpleBlock = require('../baseline/blocks/SimpleBlock'),
-	TextRegion = require('../baseline/blocks/TextRegion'),
+	TextRegion = require('../baseline/regions/TextRegion'),
 	Parser = require('../baseline/Parser')
 
 chai.use(sinon_chai)

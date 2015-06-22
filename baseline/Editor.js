@@ -184,7 +184,7 @@ Editor.prototype.keydown_handler = function (evt)
 			if (this.range.start.offset == 0)
 			{
 				evt.preventDefault()
-				this.run_command(this.commands.merge_block_with_previous)
+				this.run_command(this.commands.delete_at_boundary)
 			}
 		}
 		else if (this.range.num_blocks() > 1)

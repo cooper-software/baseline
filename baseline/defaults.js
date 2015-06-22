@@ -1,6 +1,7 @@
 var AnnotationType = require('./annotations/AnnotationType'),
 	ListBlock = require('./blocks/ListBlock'),
-	FigureBlock = require('./blocks/FigureBlock')
+	FigureBlock = require('./blocks/FigureBlock'),
+	ColumnsBlock = require('./blocks/ColumnsBlock')
 
 var annotation_types_by_name = {
 		code: new AnnotationType({
@@ -50,12 +51,13 @@ module.exports =
 	
 	block_recognizers: [
 		ListBlock.recognize,
-		FigureBlock.recognize
+		FigureBlock.recognize,
+		ColumnsBlock.recognize
 	],
 	
 	commands: 
 	{
-		merge_block_with_previous: require('./commands/merge_block_with_previous'),
+		delete_at_boundary: require('./commands/delete_at_boundary'),
 		delete_range: require('./commands/delete_range'),
 		insert_block: require('./commands/insert_block'),
 		toggle_annotation: require('./commands/toggle_annotation'),

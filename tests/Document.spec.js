@@ -6,7 +6,7 @@ var chai = require('chai'),
 	sinon_chai = require('sinon-chai'),
 	Document = require('../baseline/Document'),
 	Block = require('../baseline/blocks/Block'),
-	TextRegion = require('../baseline/blocks/TextRegion'),
+	TextRegion = require('../baseline/regions/TextRegion'),
 	Annotation = require('../baseline/annotations/Annotation'),
 	AnnotationTree = require('../baseline/annotations/AnnotationTree')
 	
