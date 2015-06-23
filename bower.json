@@ -1,6 +1,6 @@
 {
   "name": "baseline-edit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "More saner rich text editing for the web",
   "main": "build/baseline.js",
   "moduleType": [

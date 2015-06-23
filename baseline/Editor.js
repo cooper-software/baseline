@@ -29,9 +29,10 @@ var Editor = function Editor(options)
 	this.container.addEventListener('keydown', this.keydown_handler.bind(this))
 	this.container.addEventListener('keypress', this.keypress_handler.bind(this))
 	this.container.addEventListener('keyup', this.keyup_handler.bind(this))
+	this.dom_document.addEventListener('copy', this.copy_handler.bind(this))
 	this.container.addEventListener('paste', this.paste_handler.bind(this))
-	this.dom_document.addEventListener('selectionchange', this.selectionchange_handler.bind(this))
 	this.container.addEventListener('click', this.click_handler.bind(this))
+	this.dom_document.addEventListener('selectionchange', this.selectionchange_handler.bind(this))
 	this.selection_changed = false
 	
 	this.parser = new Parser({
@@ -249,10 +250,17 @@ Editor.prototype.click_handler = function (evt)
 		this.selection_changed = false
 	}
 }
+
+Editor.prototype.copy_handler = function (evt)
+{
+	evt.preventDefault()
+	this.run_command(this.commands.copy, evt)
+}
 	
 Editor.prototype.paste_handler = function (evt)
 {
 	evt.preventDefault()
+	this.run_command(this.commands.paste, evt)
 }
 
 Editor.prototype.to_html = function ()

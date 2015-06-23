@@ -62,6 +62,19 @@ var FigureBlock = Model.extend(Block,
 		{
 			return h('p', { className: 'attribution' }, ['By ' + this.attribution_name])
 		}
+	},
+	
+	insert: function (point, blocks)
+	{
+		return {
+			blocks: [ this ].concat(blocks ? blocks : []),
+			point: point.update(
+			{
+				block: blocks ? point.block + blocks.length : point.block,
+				region: blocks ? 0 : point.region+1,
+				offset: 0
+			})
+		}
 	}
 })
 

@@ -3,6 +3,7 @@
 var h = require('../vdom').h,
 	Model = require('../Model'),
 	Block = require('./Block'),
+	base_block = new Block(),
 	SimpleBlock = require('./SimpleBlock'),
 	TextRegion = require('../regions/TextRegion'),
 	DomPoint = require('../selection/DomPoint')
@@ -38,10 +39,25 @@ var ListBlock = Model.extend(Block,
 		}
 	},
 	
-	insert: function (point)
+	insert: function (point, blocks)
 	{
-		// assert(point.region >= 0 && point.region < this.regions.length &&
-		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
+		if (blocks)
+		{
+			return this.insert_blocks(point, blocks)
+		}
+		else
+		{
+			return this.insert_empty(point)
+		}
+	},
+	
+	insert_blocks: function (point, blocks)
+	{
+		return base_block.insert.call(this, point, blocks)
+	},
+	
+	insert_empty: function (point)
+	{
 		var region = this.regions[point.region]
 		
 		if (region.text.length == 0 && point.region == this.regions.length - 1)

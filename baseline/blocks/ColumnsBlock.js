@@ -77,20 +77,17 @@ var ColumnsBlock = Model.extend(Block,
 		}
 	},
 	
-	insert: function (point)
+	insert: function (point, blocks)
 	{
 		// assert(point.region >= 0 && point.region < this.regions.length &&
 		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
 		if (point.region == this.regions.length - 1)
 		{
 			return {
-				blocks: [
-					this,
-					new SimpleBlock()
-				],
+				blocks: [ this ].concat(blocks ? blocks : [new SimpleBlock()]),
 				point: new Point(
 				{
-					block: point.block + 1,
+					block: point.block + (blocks ? blocks.length : 1),
 					region: 0,
 					offset: 0
 				})
@@ -99,10 +96,11 @@ var ColumnsBlock = Model.extend(Block,
 		else
 		{
 			return {
-				blocks: [ this ],
+				blocks: [ this ].concat(blocks ? blocks : []),
 				point: point.update(
 				{
-					region: point.region+1,
+					block: blocks ? point.block + blocks.length : point.block,
+					region: blocks ? 0 : point.region+1,
 					offset: 0
 				})
 			}
@@ -156,6 +154,17 @@ var ColumnsBlock = Model.extend(Block,
 				region: point.region - 1
 			})
 		}
+	},
+	
+	extract: function (start, end)
+	{
+		var new_regions = this.regions.slice(start.region, end.region + 1),
+			last_region_index = new_regions.length - 1
+		
+		new_regions[last_region_index] = new_regions[last_region_index].delete(end.offset, new_regions[last_region_index].text.length)
+		new_regions[0] = new_regions[0].delete(0, start.offset)
+		
+		return this.update({ regions: new_regions })
 	},
 	
 	append_to: function (block)

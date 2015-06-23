@@ -97,7 +97,7 @@ Renderer.prototype.create_tree = function (blocks)
 	}
 }
 
-Renderer.prototype.to_html = function (blocks)
+Renderer.prototype.to_html = function ()
 {
 	return this.tree.dom_node.innerHTML
 }
@@ -120,6 +120,11 @@ Renderer.prototype.onchange = function (index)
 	{
 		this.onblockchange(index, new_block)
 	}
+}
+
+Renderer.prototype.clear = function ()
+{
+	this.tree = null
 }
 
 module.exports = Renderer

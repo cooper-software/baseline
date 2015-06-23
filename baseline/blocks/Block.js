@@ -96,6 +96,17 @@ module.exports = Model(
 		})
 	},
 	
+	extract: function (start, end)
+	{
+		var new_regions = this.regions.slice(start.region, end.region + 1),
+			last_region_index = new_regions.length - 1
+		
+		new_regions[last_region_index] = new_regions[last_region_index].delete(end.offset, new_regions[last_region_index].text.length)
+		new_regions[0] = new_regions[0].delete(0, start.offset)
+		
+		return this.update({ regions: new_regions })
+	},
+	
 	append_to: function (block)
 	{
 		var first_region = this.regions[0],
@@ -154,25 +165,56 @@ module.exports = Model(
 		return this.regions[this.regions.length -1]
 	},
 	
-	insert: function (point)
+	insert: function (point, blocks)
 	{
 		// assert(point.region >= 0 && point.region < this.regions.length &&
 		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
-		var region = this.regions[point.region]
-		return {
-			blocks: [
-				this.update({
-					regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.text.length) ])
-				}),
-				this.update({
-					regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+		
+		var region = this.regions[point.region],
+			start_block = this.update({
+				regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.text.length) ])
+			}),
+			end_block = this.update({
+				regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+			}),
+			new_blocks,
+			new_point
+		
+		if (blocks)
+		{
+			new_blocks = blocks[0].append_to(start_block)
+			
+			if (blocks.length == 1 && blocks[0].regions.length == 1 && new_blocks.length == 1)
+			{
+				new_blocks = end_block.append_to(new_blocks[0])
+				new_point = point.update(
+				{
+					offset: point.offset + blocks[0].regions[0].text.length
 				})
-			],
-			point: new Point({
+			}
+			else
+			{
+				new_blocks.push(end_block)
+				new_point = new Point({
+					block: point.block + blocks.length,
+					region: 0,
+					offset: 0
+				})
+			}
+		}
+		else
+		{
+			new_blocks = [start_block, end_block]
+			new_point = new Point({
 				block: point.block + 1,
-				region: point.region + 1,
+				region: 0,
 				offset: 0
 			})
+		}
+		
+		return {
+			blocks: new_blocks,
+			point: new_point
 		}
 	},
 	

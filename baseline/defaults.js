@@ -61,6 +61,8 @@ module.exports =
 		delete_range: require('./commands/delete_range'),
 		insert_block: require('./commands/insert_block'),
 		toggle_annotation: require('./commands/toggle_annotation'),
-		set_block_type: require('./commands/set_block_type')
+		set_block_type: require('./commands/set_block_type'),
+		copy: require('./commands/copy'),
+		paste: require('./commands/paste')
 	}
 }
