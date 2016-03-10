@@ -177,8 +177,8 @@ describe('baseline.commands', function ()
 			orig_doc = editor.document
 		
 		this.stub(orig_doc, "has_annotation").returns(true)
-		this.stub(orig_doc, "add_annotation").returns('foo')
-		this.stub(orig_doc, "remove_annotation").returns('bar')
+		this.stub(orig_doc, "add_annotation").returns(editor.document)
+		this.stub(orig_doc, "remove_annotation").returns(editor.document)
 		
 		editor.commands.toggle_annotation(editor, proto_ann)
 		

@@ -16,8 +16,7 @@ BlockThunk.prototype.render = function (previous)
 	{
 		return this.vnode
 	}
-	else if (previous && previous.vnode && 
-		previous.block == this.block)
+	else if (previous && previous.vnode && previous.block == this.block)
 	{
 		this.vnode = previous.vnode
 		return previous.vnode

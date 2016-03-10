@@ -12,7 +12,12 @@ var VirtualNode = Model(
 
 var VirtualText = Model.extend(VirtualNode,
 {
-	text: ''
+	text: '',
+    
+    to_html: function ()
+    {
+        return this.text
+    }
 })
 
 var prop_attr_map = {
@@ -80,7 +85,57 @@ var VirtualElement = Model.extend(VirtualNode,
 				return this.properties.attributes[name]
 			}
 		}
-	}
+	},
+    
+    to_html: function ()
+    {
+        var html = '<' + this.tag.toLowerCase()
+        
+        if (this.properties.attributes)
+        {
+            var attrs = this.properties.attributes,
+                keys = Object.keys(attrs)
+            
+            if (keys.length > 0)
+            {
+                html += ' ' + keys.map(function (k)
+                {
+                    return k+'="'+attrs[k]+'"'
+                }).join(' ')
+            }
+        }
+        
+        if (this.properties.style)
+        {
+            var styles = this.properties.styles,
+                keys = Object.keys(attrs)
+                
+            if (keys.length > 0)
+            {
+                html += ' style="'
+                html += keys.map(function (k)
+                {
+                    return 'k:'+styles[k]
+                }).join(';')
+            }
+        }
+        
+        html += '>'
+        
+        html += this.children.map(function (c)
+        {
+            if (c.vnode)
+            {
+                return c.vnode.to_html()
+            }
+            else
+            {
+                return c.to_html()
+            }
+        }).join('')
+        
+        return html + '</'+ this.tag.toLowerCase() +'>'
+    }
 })
 
 module.exports = 

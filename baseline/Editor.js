@@ -92,7 +92,6 @@ Editor.prototype.onblockchange = function (i, new_block)
 		this.update_document({
 			blocks: blocks.slice(0, i).concat(blocks.slice(i+1))
 		})
-		this.render()
 	}
 }
 
@@ -105,6 +104,7 @@ Editor.prototype.set_document = function (doc)
 {
 	this.document = doc
 	this.changes.push(this.document)
+  this.render()
 	
 	if (this.ondocumentchange)
 	{

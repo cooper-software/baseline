@@ -20,8 +20,8 @@ var annotation_types_by_name = {
 		}),
 		italic: new AnnotationType({
 			rank: 20,
-			tag: 'EM',
-			tag_aliases: new Set(['I'])
+			tag: 'I',
+			tag_aliases: new Set(['EM'])
 		}),
 		underline: new AnnotationType({
 			rank: 30,

@@ -22,7 +22,7 @@ Parser.prototype.parse_html = function (document, html)
 {
 	var div = document.createElement('div')
 	div.innerHTML = html
-	return this.parse_dom(div.childNodes[0])
+	return this.parse_dom(div)
 }
 
 Parser.prototype.parse_dom = function (dom_node)

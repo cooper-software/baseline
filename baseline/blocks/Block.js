@@ -180,7 +180,7 @@ module.exports = Model(
 			new_blocks,
 			new_point
 		
-		if (blocks)
+		if (blocks && blocks.length > 0)
 		{
 			new_blocks = blocks[0].append_to(start_block)
 			

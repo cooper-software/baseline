@@ -29,14 +29,12 @@ describe('Parser', function ()
 	{
 		var parser = new Parser(),
 			result = parser.parse_html(document, 
-				'<div>'+
-					'<p>A</p>'+
-					'<h1>B</h1>'+
-					'<h2>C</h2>'+
-					'<h3>D</h3>'+
-					'<h4>E</h4>'+
-					'<blockquote>F</blockquote>'+
-				'</div>'
+				'<p>A</p>'+
+				'<h1>B</h1>'+
+				'<h2>C</h2>'+
+				'<h3>D</h3>'+
+				'<h4>E</h4>'+
+				'<blockquote>F</blockquote>'
 			)
 		expect(result.length).to.equal(6)
 		expect(result[0].tag).to.equal('P')
@@ -69,11 +67,9 @@ describe('Parser', function ()
 	{
 		var parser = new Parser(),
 			result = parser.parse_html(document, 
-				'<div>'+
-					'<p>A</p>'+
-					'<foo>B</foo>'+
-					'<h2>C</h2>'+
-				'</div>'
+				'<p>A</p>'+
+				'<foo>B</foo>'+
+				'<h2>C</h2>'
 			)
 		
 		expect(result.length).to.equal(2)
@@ -98,7 +94,7 @@ describe('Parser', function ()
 			}
 		})
 		
-		var result = parser.parse_html(document, '<div><p>foo</p></div>')
+		var result = parser.parse_html(document, '<p>foo</p>')
 		expect(result).to.deep.equal(['FOO'])
 	})
 	
@@ -111,7 +107,7 @@ describe('Parser', function ()
 			done()
 		})
 		
-		parser.parse_html(document, '<div><p>foo</p></div>')
+		parser.parse_html(document, '<p>foo</p>')
 	})
 	
 	it('falls back to a simple block when block recognizers don\'t return anything', function ()
@@ -119,7 +115,7 @@ describe('Parser', function ()
 		var parser = new Parser()
 		parser.block_recognizers.push(function (vnode){})
 		
-		var result = parser.parse_html(document, '<div><p>foo</p></div>')
+		var result = parser.parse_html(document, '<p>foo</p>')
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
 		expect(result[0].regions.length).to.equal(1)
@@ -135,7 +131,7 @@ describe('Parser', function ()
 					function () { return 'two' }
 				]
 			}),
-			result = parser.parse_html(document, '<div><foo></foo></div>')
+			result = parser.parse_html(document, '<foo></foo>')
 		
 		expect(result).to.deep.equal(['one'])
 	})
@@ -143,7 +139,7 @@ describe('Parser', function ()
 	it('does not parse unrecognized annotations', function ()
 	{
 		var parser = new Parser({ annotation_types: [] }),
-			result = parser.parse_html(document, '<div><p>Foo bar <strong>baz</strong></p></div>')
+			result = parser.parse_html(document, '<p>Foo bar <strong>baz</strong></p>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
@@ -155,7 +151,7 @@ describe('Parser', function ()
 	it('parses recognized annotations', function ()
 	{
 		var parser = new Parser({ annotation_types: [ new AnnotationType({ tag: 'STRONG' }) ] }),
-			result = parser.parse_html(document, '<div><p>Foo bar <strong>baz</strong></p></div>')
+			result = parser.parse_html(document, '<p>Foo bar <strong>baz</strong></p>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
@@ -176,7 +172,7 @@ describe('Parser', function ()
 					new AnnotationType({ tag: 'BAR', rank: 10 })
 				]
 			}),
-			result = parser.parse_html(document, '<div><p>Foo bar <bar>baz <foo>qux</foo></bar></p></div>')
+			result = parser.parse_html(document, '<p>Foo bar <bar>baz <foo>qux</foo></bar></p>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')
