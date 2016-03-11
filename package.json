@@ -1,6 +1,6 @@
 {
   "name": "baseline-edit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "baseline",
   "description": "More saner rich text editing for the web",
   "scripts": {

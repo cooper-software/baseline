@@ -21,7 +21,12 @@ var ListBlock = Model.extend(Block,
 			this.list_tag, 
 			this.regions.map(function (region)
 			{
-				return h(item_tag, region.text == '' ? [ h('br') ] : region.render())
+				var style = {}
+				if (region.alignment != 'left')
+				{
+					style.textAlign = region.alignment
+				}
+				return h(item_tag, { style: style }, region.text == '' ? [ h('br') ] : region.render())
 			})
 		)
 	},

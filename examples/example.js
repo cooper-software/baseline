@@ -7,6 +7,9 @@ var revision = document.getElementById('revision'),
 		h3: document.getElementById('action-h3'),
 		ol: document.getElementById('action-ol'),
 		ul: document.getElementById('action-ul'),
+		left: document.getElementById('action-left'),
+		center: document.getElementById('action-center'),
+		right: document.getElementById('action-right'),
 		bold: document.getElementById('action-bold'),
 		italic: document.getElementById('action-italic'),
 		underline: document.getElementById('action-underline'),
@@ -72,6 +75,17 @@ buttons.normal.addEventListener('click', function ()
 		editor.run_command(
 			editor.commands.set_block_type,
 			prototype_block
+		)
+	})
+})
+
+;['left', 'center', 'right'].forEach(function (n)
+{
+	buttons[n].addEventListener('click', function ()
+	{
+		editor.run_command(
+			editor.commands.set_text_alignment,
+			n
 		)
 	})
 })

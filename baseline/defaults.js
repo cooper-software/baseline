@@ -62,6 +62,7 @@ module.exports =
 		insert_block: require('./commands/insert_block'),
 		toggle_annotation: require('./commands/toggle_annotation'),
 		set_block_type: require('./commands/set_block_type'),
+		set_text_alignment: require('./commands/set_text_alignment'),
 		copy: require('./commands/copy'),
 		paste: require('./commands/paste')
 	}

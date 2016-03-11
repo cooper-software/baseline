@@ -23,6 +23,7 @@ describe('blocks.TextRegion', function ()
 	{
 		var text = new TextRegion()
 		expect(text.text).to.equal('')
+		expect(text.alignment).to.equal('left')
 		expect(text.annotations.constructor).to.equal(AnnotationTree)
 		expect(text.annotations.empty()).to.be.true
 	})

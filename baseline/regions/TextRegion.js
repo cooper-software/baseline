@@ -9,6 +9,7 @@ module.exports = Model(
 {
 	text: '',
 	annotations: new AnnotationTree(),
+	alignment: 'left',
 	
 	delete: function (start, end)
 	{

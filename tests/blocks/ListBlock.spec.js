@@ -232,4 +232,19 @@ describe('blocks.ListBlock', function ()
 		expect(result.point.region).to.equal(0)
 		expect(result.point.offset).to.equal(0)
 	})
+	
+	it('renders text alignment as a style in its regions', function ()
+	{
+		var block = new ListBlock({
+			regions: [
+				new TextRegion({ alignment: 'left' }),
+				new TextRegion({ alignment: 'right' }),
+				new TextRegion({ alignment: 'center' })
+			]
+		})
+		var vtree = block.render()
+		expect(vtree.children[0].properties.style).to.deep.equal({})
+		expect(vtree.children[1].properties.style.textAlign).to.equal('right')
+		expect(vtree.children[2].properties.style.textAlign).to.equal('center')
+	})
 })

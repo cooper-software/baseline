@@ -12,7 +12,13 @@ module.exports = Model.extend(Block,
 	
 	render: function ()
 	{
-		return h(this.tag, this.regions[0].text == '' ? h('br') : this.regions[0].render())
+		var region = this.regions[0]
+		var style = {}
+		if (region.alignment != 'left')
+		{
+			style.textAlign = region.alignment
+		}
+		return h(this.tag, { style: style }, this.regions[0].text == '' ? h('br') : this.regions[0].render())
 	},
 	
 	get_position_of_dom_point: function (block_node, dom_point)

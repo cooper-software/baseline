@@ -52,11 +52,17 @@ var ColumnsBlock = Model.extend(Block,
 			},
 			this.regions.map(function (region)
 			{
+				var style = {}
+				if (region.alignment != 'left')
+				{
+					style.textAlign = region.alignment
+				}
 				return h(
 					'div',
 					{
 						className: 'column span-1-' + this.columns,
-						contentEditable: true
+						contentEditable: true,
+						style: style
 					},
 					region.render()
 				)
