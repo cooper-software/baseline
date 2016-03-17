@@ -52,7 +52,7 @@ module.exports = Model(
 		return this.set(results)
 	},
 	
-	filter: function ()
+	filter: function (fn)
 	{
 		var results = []
 		this.root.walk(function (ann)
@@ -65,12 +65,19 @@ module.exports = Model(
 		return this.set(results)
 	},
 	
-	in_range: function (offset, length)
+	in_range: function (start, end)
 	{
-		return this.filter(function (ann)
+		var offset = start
+		var length = end - start
+		var matches = []
+		this.root.walk(function (ann)
 		{
-			return ann.overlaps(offset, length)
+			if (ann.overlaps(offset, length))
+			{
+				matches.push(ann)
+			}
 		})
+		return matches
 	},
 	
 	remove: function (start, end)

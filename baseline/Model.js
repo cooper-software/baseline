@@ -36,12 +36,19 @@ Model.extend = function (parent, props)
 		new_props[k] = props[k]
 	})
 	
-	return Model(new_props)
+	var model =  Model(new_props)
+	model._parent = parent
+	return model
 }
 
 Model.is_instance = function (inst, model)
 {
 	var child = inst.constructor
+	
+	if (child === model)
+	{
+		return true
+	}
 	
 	while (child._parent)
 	{

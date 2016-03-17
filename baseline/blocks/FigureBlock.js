@@ -29,6 +29,7 @@ var FigureBlock = Model.extend(Block,
 					alt: this.alt,
 					width: this.width,
 					height: this.height,
+					contentEditable: true,
 					ondragstart: function (e)
 					{
 						e.preventDefault()
@@ -44,7 +45,7 @@ var FigureBlock = Model.extend(Block,
 		if (this.caption || this.attribution_name || this.attribution_url)
 		{
 			return h('figcaption', [
-				this.caption ? h('p', { className: 'caption' }, this.caption) : null,
+				this.caption ? h('p', { className: 'caption', contentEditable: true }, this.caption) : null,
 				this.render_attribution()
 			])
 		}
@@ -75,6 +76,11 @@ var FigureBlock = Model.extend(Block,
 				offset: 0
 			})
 		}
+	},
+	
+	append_to: function (block)
+	{
+		return [block, this]
 	}
 })
 

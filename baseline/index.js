@@ -9,5 +9,7 @@ module.exports =
 	AnnotationType: require('./annotations/AnnotationType'),
 	Annotation: require('./annotations/Annotation'),
 	SimpleBlock: require('./blocks/SimpleBlock'),
-	ListBlock: require('./blocks/ListBlock')
+	ListBlock: require('./blocks/ListBlock'),
+	FigureBlock: require('./blocks/FigureBlock'),
+	Model: require('./Model')
 }

@@ -16,6 +16,7 @@ module.exports = function (editor, new_blocks)
 		blocks = editor.document.blocks
 	
 	var result = blocks[range.start.block].insert(range.start, new_blocks)
+	
 	editor.update_document(
 	{
 		blocks: blocks.slice(0, range.start.block)

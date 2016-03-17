@@ -23,22 +23,46 @@ var Editor = function Editor(options)
 	this.onselectionchange = options.onselectionchange
 	this.dom_window = options.dom_window || window
 	this.dom_document = this.dom_window.document
-	
-	this.container = options.container
-	this.container.contentEditable = true
-	this.container.addEventListener('keydown', this.keydown_handler.bind(this))
-	this.container.addEventListener('keypress', this.keypress_handler.bind(this))
-	this.container.addEventListener('keyup', this.keyup_handler.bind(this))
-	this.dom_document.addEventListener('copy', this.copy_handler.bind(this))
-	this.container.addEventListener('paste', this.paste_handler.bind(this))
-	this.container.addEventListener('click', this.click_handler.bind(this))
-	this.dom_document.addEventListener('selectionchange', this.selectionchange_handler.bind(this))
 	this.selection_changed = false
+	this.ignore_selection_change = false
+	
+	this.bound_event_listeners = {
+		keydown: this.keydown_handler.bind(this),
+		keypress: this.keypress_handler.bind(this),
+		keyup: this.keyup_handler.bind(this),
+		copy: this.copy_handler.bind(this),
+		paste: this.paste_handler.bind(this),
+		click: this.click_handler.bind(this),
+		selectionchange: this.selectionchange_handler.bind(this)
+	}
+	this.container_events = ['keydown', 'keypress', 'keyup', 'paste', 'click']
+	this.document_events = ['copy', 'selectionchange']
 	
 	this.parser = new Parser({
 		block_recognizers: defaults.block_recognizers,
 		annotation_types: defaults.annotation_types
 	})
+	
+	this.commands = {}
+	Object.keys(defaults.commands).forEach(function (k)
+	{
+		this.commands[k] = defaults.commands[k]
+	}.bind(this))
+	
+	this.set_container(options.container)
+}
+
+Editor.prototype.set_container = function (container)
+{
+	if (this.container)
+	{
+		this.remove_event_listeners()
+	}
+	
+	this.container = container
+	this.container.contentEditable = true
+	
+	this.add_event_listeners()
 	
 	this.renderer = new Renderer({
 		container: this.container,
@@ -47,27 +71,40 @@ var Editor = function Editor(options)
 		parser: this.parser
 	})
 	
-	if (options.document)
-	{
-		this.document = options.document
-	}
-	else
-	{
-		this.document = new Document({
-			blocks: this.parser.parse_dom(this.container)
-		})
-	}
+	this.document = new Document({
+		blocks: this.parser.parse_dom(this.container)
+	})
 	
 	this.changes = new ChangeTracker(this.document)
 	
-	this.commands = {}
-	Object.keys(defaults.commands).forEach(function (k)
-	{
-		this.commands[k] = defaults.commands[k]
-	}.bind(this))
-	
 	this.update_range_from_window()
 	this.render()
+}
+
+Editor.prototype.add_event_listeners = function ()
+{
+	this.container_events.forEach(function (k)
+	{
+		this.container.addEventListener(k, this.bound_event_listeners[k])
+	}.bind(this))
+	
+	this.document_events.forEach(function (k)
+	{
+		this.dom_document.addEventListener(k, this.bound_event_listeners[k])
+	}.bind(this))
+}
+
+Editor.prototype.remove_event_listeners = function ()
+{
+	this.container_events.forEach(function (k)
+	{
+		this.container.removeEventListener(k, this.bound_event_listeners[k])
+	}.bind(this))
+	
+	this.document_events.forEach(function (k)
+	{
+		this.dom_document.removeEventListener(k, this.bound_event_listeners[k])
+	}.bind(this))
 }
 
 Editor.prototype.render = function ()
@@ -224,6 +261,11 @@ Editor.prototype.keyup_handler = function (evt)
 
 Editor.prototype.selectionchange_handler = function (evt)
 {
+	if (this.ignore_selection_change)
+	{
+		return
+	}
+	
 	this.selection_changed = true
 	this.update_range_from_window()
 	
