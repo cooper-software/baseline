@@ -278,6 +278,38 @@ module.exports = Model(
 		}
 	},
 	
+	annotations_in_range: function (start, end, prototype_annotation)
+	{
+		var matches = []
+		
+		if (this.opaque)
+		{
+			return matches
+		}
+		
+		var start_region = this.regions[start.region]
+		matches = matches.concat(
+			start_region.get_annotations(start.offset, end.region == start.region ? end.offset : start_region.size(), prototype_annotation)
+		)
+		
+		if (end.region == start.region)
+		{
+			return matches
+		}
+		
+		var end_region = this.regions[end.region]
+		matches = matches.concat(
+			end_region.get_annotations(0, end.offset, prototype_annotation)
+		)
+		
+		this.regions.slice(start.region+1, end.region).every(function (region)
+		{
+			matches.concat(region.get_annotations(0, region.size(), prototype_annotation))
+		})
+		
+		return matches
+	},
+	
 	has_annotation: function (start, end, prototype_annotation)
 	{
 		if (this.opaque)

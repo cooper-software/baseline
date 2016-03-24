@@ -60,6 +60,23 @@ module.exports = Model(
 		})
 	},
 	
+	get_annotations: function (start, end, prototype_annotation)
+	{
+		var matches = []
+		var length = end - start
+		
+		this.annotations.each(function (annotation)
+		{
+			if (annotation.overlaps(start, length) &&
+					Model.equals(annotation, prototype_annotation, ['type']))
+			{
+				matches.push(annotation)
+			}
+		})
+		
+		return matches
+	},
+	
 	add_annotation: function (start, end, prototype_annotation)
 	{
 		return this.update({
