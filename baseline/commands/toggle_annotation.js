@@ -14,4 +14,6 @@ module.exports = function (editor, prototype_annotation)
 			editor.document.add_annotation(editor.range, prototype_annotation)
 		)
 	}
+	
+	editor.update_selection()
 }

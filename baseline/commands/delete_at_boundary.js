@@ -62,4 +62,6 @@ module.exports = function (editor)
 			end: result.point
 		})
 	}
+	
+	editor.update_selection()
 }

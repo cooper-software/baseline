@@ -40,4 +40,5 @@ module.exports = function (editor)
 	})
 	
 	editor.range = range.collapse()
+	editor.update_selection()
 }

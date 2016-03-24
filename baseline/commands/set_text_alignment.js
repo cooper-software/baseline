@@ -26,4 +26,6 @@ module.exports = function (editor, alignment)
             editor.document.blocks.slice(editor.range.end.block + 1)
           )
   })
+  
+  editor.update_selection()
 }

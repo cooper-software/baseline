@@ -11,6 +11,7 @@ module.exports = function (editor, event)
 	if (vtree)
 	{
 		insert_blocks_from_vtree(editor, vtree)
+		editor.update_selection()
 	}
 }
 

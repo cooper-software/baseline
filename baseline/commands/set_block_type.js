@@ -30,4 +30,6 @@ module.exports = function (editor, prototype_block)
 		start: changes.point, 
 		end: changes.point
 	})
+	
+	editor.update_selection()
 }

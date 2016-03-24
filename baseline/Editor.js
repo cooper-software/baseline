@@ -203,24 +203,12 @@ Editor.prototype.run_command = function ()
 		return
 	}
 	
-	var old_range = this.range
-	
 	var command = arguments[0],
 		args = Array.prototype.slice.call(arguments, 1)
 	
 	args.unshift(this)
 	command.apply(null, args)
 	this.render()
-	
-	this.range.set_in_window(this.dom_window, this.container, this.document)
-	
-	if (this.range != old_range)
-	{
-		if (this.onselectionchange)
-		{
-			this.onselectionchange(this)
-		}
-	}
 }
 	
 Editor.prototype.keydown_handler = function (evt)
@@ -279,6 +267,16 @@ Editor.prototype.selectionchange_handler = function (evt)
 	
 	this.selection_changed = true
 	this.update_range_from_window()
+	
+	if (this.onselectionchange)
+	{
+		this.onselectionchange(this)
+	}
+}
+
+Editor.prototype.update_selection = function ()
+{
+	this.range.set_in_window(this.dom_window, this.container, this.document)
 	
 	if (this.onselectionchange)
 	{

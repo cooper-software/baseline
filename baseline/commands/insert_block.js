@@ -29,4 +29,6 @@ module.exports = function (editor, new_blocks)
 		start: result.point,
 		end: result.point
 	})
+	
+	editor.update_selection()
 }
