@@ -65,7 +65,7 @@ var ListBlock = Model.extend(Block,
 	{
 		var region = this.regions[point.region]
 		
-		if (region.text.length == 0 && point.region == this.regions.length - 1)
+		if (region.size() == 0 && point.region == this.regions.length - 1)
 		{
 			return {
 				blocks: [
@@ -94,7 +94,7 @@ var ListBlock = Model.extend(Block,
 					{
 						regions: this.regions
 									.slice(0, point.region)
-									.concat([ region.delete(point.offset, region.text.length) ])
+									.concat([ region.delete(point.offset, region.size()) ])
 									.concat([ region.delete(0, point.offset) ])
 									.concat(this.regions.slice(point.region+1))
 					})

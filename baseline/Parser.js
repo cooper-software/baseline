@@ -5,7 +5,7 @@ var vdom = require('./vdom'),
 	SimpleBlock = require('./blocks/SimpleBlock'),
 	TextRegion = require('./regions/TextRegion'),
 	Annotation = require('./annotations/Annotation'),
-	AnnotationTree = require('./annotations/AnnotationTree')
+	AnnotationCollection = require('./annotations/AnnotationCollection')
 
 var Parser = function Parser(options)
 {
@@ -108,7 +108,7 @@ Parser.prototype.parse_region = function (vnode)
 		
 		return new TextRegion({
 			text: context.text,
-			annotations: context.annotations.length > 0 ? (new AnnotationTree()).concat(context.annotations.reverse()) : new AnnotationTree()
+			annotations: context.annotations.length > 0 ? (new AnnotationCollection()).set(context.annotations.reverse()) : new AnnotationCollection()
 		})
 	}
 }

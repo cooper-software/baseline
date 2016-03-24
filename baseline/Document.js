@@ -63,7 +63,7 @@ module.exports = Model(
 				}
 				else
 				{
-					if (!fn(block, range.start, { region: block.regions.length-1, offset: block.regions[block.regions.length-1].text.length }))
+					if (!fn(block, range.start, { region: block.regions.length-1, offset: block.regions[block.regions.length-1].size() }))
 					{
 						return false
 					}
@@ -78,7 +78,7 @@ module.exports = Model(
 			}
 			else
 			{
-				if (!fn(block, { region: 0, offset: 0 }, { region: block.regions.length-1, offset: block.regions[block.regions.length-1].text.length }))
+				if (!fn(block, { region: 0, offset: 0 }, { region: block.regions.length-1, offset: block.regions[block.regions.length-1].size() }))
 				{
 					return false
 				}

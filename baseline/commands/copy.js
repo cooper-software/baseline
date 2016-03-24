@@ -31,7 +31,7 @@ module.exports = function (editor, event)
 		
 		fragment = [
 				start_block.extract(
-					start, { region: start_block.regions.length-1, offset: start_block.regions[start_block.regions.length-1].text.length }
+					start, { region: start_block.regions.length-1, offset: start_block.regions[start_block.regions.length-1].size() }
 				)
 			]
 			.concat(blocks.slice(start.block+1, end.block))

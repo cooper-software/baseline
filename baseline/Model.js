@@ -110,7 +110,7 @@ Model.equals = function (a, b, only)
 		{
 			for (var k in a)
 			{
-				if (a.hasOwnProperty(k) && k != '_version')
+				if (a.hasOwnProperty(k))
 				{
 					if (!prop_equals(a[k], b[k]))
 					{

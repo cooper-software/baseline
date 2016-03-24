@@ -11,7 +11,7 @@ var expect = require('chai').expect,
 	Parser = require('../../baseline/Parser'),
 	DomPoint = require('../../baseline/selection/DomPoint'),
 	Point = require('../../baseline/selection/Point'),
-	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
+	AnnotationCollection = require('../../baseline/annotations/AnnotationCollection'),
 	Annotation = require('../../baseline/annotations/Annotation')
 
 
@@ -173,7 +173,7 @@ describe('blocks.ListBlock', function ()
 					new TextRegion({ text: 'Foo' }),
 					new TextRegion({
 						text: 'Bar',
-						annotations: (new AnnotationTree()).concat([
+						annotations: (new AnnotationCollection()).set([
 							new Annotation({ offset: 1, length: 2 })
 						])
 					})

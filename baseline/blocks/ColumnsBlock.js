@@ -167,7 +167,7 @@ var ColumnsBlock = Model.extend(Block,
 		var new_regions = this.regions.slice(start.region, end.region + 1),
 			last_region_index = new_regions.length - 1
 		
-		new_regions[last_region_index] = new_regions[last_region_index].delete(end.offset, new_regions[last_region_index].text.length)
+		new_regions[last_region_index] = new_regions[last_region_index].delete(end.offset, new_regions[last_region_index].size())
 		new_regions[0] = new_regions[0].delete(0, start.offset)
 		
 		return this.update({ regions: new_regions })

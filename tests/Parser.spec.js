@@ -171,8 +171,8 @@ describe('Parser', function ()
 					new AnnotationType({ tag: 'FOO', rank: 0 }),
 					new AnnotationType({ tag: 'BAR', rank: 10 })
 				]
-			}),
-			result = parser.parse_html(document, '<p>Foo bar <bar>baz <foo>qux</foo></bar></p>')
+			})
+		var result = parser.parse_html(document, '<p>Foo bar <bar>baz <foo>qux</foo></bar></p>')
 		
 		expect(result.length).to.equal(1)
 		expect(result[0].tag).to.equal('P')

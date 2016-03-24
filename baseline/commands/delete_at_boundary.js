@@ -11,11 +11,21 @@ module.exports = function (editor)
 	{
 		if (range.start.block > 0)
 		{
+			var new_blocks
+			if (blocks[range.start.block].opaque)
+			{
+				new_blocks = [blocks[range.start.block-1]]
+			}
+			else
+			{
+				new_blocks = blocks[range.start.block].append_to(blocks[range.start.block-1])
+			}
+			
 			editor.update_document(
 			{
 				blocks: blocks
 							.slice(0, range.start.block-1)
-							.concat(blocks[range.start.block].append_to(blocks[range.start.block-1]))
+							.concat(new_blocks)
 							.concat(blocks.slice(range.start.block+1))
 			})
 			
@@ -23,7 +33,7 @@ module.exports = function (editor)
 			{
 				block: range.start.block-1,
 				region: editor.document.blocks[range.start.block-1].regions.length - 1,
-				offset: blocks[range.start.block-1].last_region().text.length
+				offset: blocks[range.start.block-1].last_region().size()
 			})
 			
 			editor.range = range.update(

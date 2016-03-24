@@ -2,10 +2,11 @@
 
 var model = require('./model'),
 	VirtualText = model.VirtualText,
-	VirtualElement = model.VirtualElement
+	VirtualElement = model.VirtualElement,
+	RawHTML = model.RawHTML
 
 
-module.exports = function ()
+var h = function ()
 {
 	if (arguments.length == 0)
 	{
@@ -55,7 +56,9 @@ var process_args = function (args, properties, children)
 			return
 		}
 		
-		if (arg.constructor == VirtualElement)
+		if (arg.constructor == VirtualElement ||
+			arg.constructor == VirtualText ||
+			arg.constructor == RawHTML)
 		{
 			children.push(arg)
 		}
@@ -80,3 +83,10 @@ var process_args = function (args, properties, children)
 		}
 	})
 }
+
+h.raw = function (html)
+{
+	return new model.RawHTML({ html: html })
+}
+
+module.exports = h

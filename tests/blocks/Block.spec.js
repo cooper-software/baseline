@@ -17,7 +17,7 @@ describe('blocks.Block', function ()
 	it('has a regions property', function ()
 	{
 		var block = new Block()
-		expect(block.regions).to.deep.equal([])
+		expect(block.regions).to.deep.equal([new TextRegion()])
 	})
 	
 	it('has a render method', function ()

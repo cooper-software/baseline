@@ -35,12 +35,12 @@ var Editor = function Editor(options)
 		click: this.click_handler.bind(this),
 		selectionchange: this.selectionchange_handler.bind(this)
 	}
-	this.container_events = ['keydown', 'keypress', 'keyup', 'paste', 'click']
-	this.document_events = ['copy', 'selectionchange']
+	this.container_events = ['keydown', 'keypress', 'keyup', 'paste', 'copy', 'click']
+	this.document_events = ['selectionchange']
 	
 	this.parser = new Parser({
-		block_recognizers: defaults.block_recognizers,
-		annotation_types: defaults.annotation_types
+		block_recognizers: options.block_recognizers || defaults.block_recognizers,
+		annotation_types: options.annotation_types || defaults.annotation_types
 	})
 	
 	this.commands = {}
@@ -203,13 +203,24 @@ Editor.prototype.run_command = function ()
 		return
 	}
 	
+	var old_range = this.range
+	
 	var command = arguments[0],
 		args = Array.prototype.slice.call(arguments, 1)
 	
 	args.unshift(this)
 	command.apply(null, args)
 	this.render()
+	
 	this.range.set_in_window(this.dom_window, this.container, this.document)
+	
+	if (this.range != old_range)
+	{
+		if (this.onselectionchange)
+		{
+			this.onselectionchange(this)
+		}
+	}
 }
 	
 Editor.prototype.keydown_handler = function (evt)
@@ -292,17 +303,17 @@ Editor.prototype.click_handler = function (evt)
 		this.selection_changed = false
 	}
 }
-
-Editor.prototype.copy_handler = function (evt)
-{
-	evt.preventDefault()
-	this.run_command(this.commands.copy, evt)
-}
 	
 Editor.prototype.paste_handler = function (evt)
 {
 	evt.preventDefault()
 	this.run_command(this.commands.paste, evt)
+}
+
+Editor.prototype.copy_handler = function (evt)
+{
+	evt.preventDefault()
+	this.run_command(this.commands.copy, evt)
 }
 
 Editor.prototype.to_html = function ()

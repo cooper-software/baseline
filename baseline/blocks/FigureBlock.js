@@ -3,10 +3,13 @@
 var h = require('../vdom').h,
 	Model = require('../Model'),
 	Block = require('./Block'),
-	TextRegion = require('../regions/TextRegion')
+	TextRegion = require('../regions/TextRegion'),
+	DomPoint = require('../selection/DomPoint'),
+	Point = require('../selection/Point')
 
 var FigureBlock = Model.extend(Block,
 {
+	opaque: true,
 	src: '',
 	alt: '',
 	caption: '',
@@ -14,18 +17,19 @@ var FigureBlock = Model.extend(Block,
 	height: 0,
 	attribution_name: '',
 	attribution_url: '',
-	regions: [ new TextRegion() ],
 	
 	render: function ()
 	{
 		return h(
 			'figure',
 			{
+				className: 'image',
 				contentEditable: false
 			},
 			[
 				h('img', {
 					src: this.src,
+					className: this.src ? '' : 'empty',
 					alt: this.alt,
 					width: this.width,
 					height: this.height,
@@ -45,7 +49,7 @@ var FigureBlock = Model.extend(Block,
 		if (this.caption || this.attribution_name || this.attribution_url)
 		{
 			return h('figcaption', [
-				this.caption ? h('p', { className: 'caption', contentEditable: true }, this.caption) : null,
+				this.caption ? h('p', { className: 'caption' }, this.caption) : null,
 				this.render_attribution()
 			])
 		}
@@ -63,30 +67,13 @@ var FigureBlock = Model.extend(Block,
 		{
 			return h('p', { className: 'attribution' }, ['By ' + this.attribution_name])
 		}
-	},
-	
-	insert: function (point, blocks)
-	{
-		return {
-			blocks: [ this ].concat(blocks ? blocks : []),
-			point: point.update(
-			{
-				block: blocks ? point.block + blocks.length : point.block,
-				region: blocks ? 0 : point.region+1,
-				offset: 0
-			})
-		}
-	},
-	
-	append_to: function (block)
-	{
-		return [block, this]
 	}
 })
 
 FigureBlock.recognize = function (vnode)
 {
-	if (vnode.tag != 'FIGURE')
+	if (vnode.tag != 'FIGURE' ||
+			vnode.prop('className') != 'image')
 	{
 		return
 	}

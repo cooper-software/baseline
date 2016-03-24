@@ -106,7 +106,7 @@ describe('blocks.FigureBlock', function ()
 	
 	it('has a recognizer', function ()
 	{
-		var vnode = h('figure', [ h('img', { src: 'foo' }) ]),
+		var vnode = h('figure', { className: 'image' }, [ h('img', { src: 'foo' }) ]),
 			block = FigureBlock.recognize(vnode)
 		
 		expect(block.constructor).to.equal(FigureBlock)
@@ -114,7 +114,7 @@ describe('blocks.FigureBlock', function ()
 	
 	it('won\'t recognize a figure with a missing or empty image', function ()
 	{
-		var vnode = h('figure', [ h('p', 'stuff') ]),
+		var vnode = h('figure', { className: 'image' }, [ h('p', 'stuff') ]),
 			block = FigureBlock.recognize(vnode)
 		
 		expect(block).to.be.undefined
@@ -122,7 +122,7 @@ describe('blocks.FigureBlock', function ()
 	
 	it('will recognize a figure with image, caption and attribution', function ()
 	{
-		var vnode = h('figure', [
+		var vnode = h('figure', { className: 'image' }, [
 				h('img', { src: 'foo', alt: 'bar', width: 555, height: 2020 }),
 				h('figcaption', [
 					h('p', { className: 'caption' }, [ 'Foo bar baz' ]),
@@ -146,7 +146,7 @@ describe('blocks.FigureBlock', function ()
 	
 	it('will recognize a figure with a an attribution name, but not a URL', function ()
 	{
-		var vnode = h('figure', [
+		var vnode = h('figure', { className: 'image' }, [
 				h('img', { src: 'foo' }),
 				h('figcaption', [
 					h('p', { className: 'caption' }, [ 'Foo bar baz' ]),
@@ -162,7 +162,7 @@ describe('blocks.FigureBlock', function ()
 	
 	it('will recognize a figure with a an attribution URL, but not a name', function ()
 	{
-		var vnode = h('figure', [
+		var vnode = h('figure', { className: 'image' }, [
 				h('img', { src: 'foo' }),
 				h('figcaption', [
 					h('p', { className: 'caption' }, [ 'Foo bar baz' ]),

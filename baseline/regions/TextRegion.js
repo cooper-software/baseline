@@ -2,14 +2,19 @@
 
 var h = require('../vdom').h,
 	Model = require('../Model'),
-	AnnotationTree = require('../annotations/AnnotationTree'),
+	AnnotationCollection = require('../annotations/AnnotationCollection'),
 	DomPoint = require('../selection/DomPoint')
 
 module.exports = Model(
 {
 	text: '',
-	annotations: new AnnotationTree(),
+	annotations: new AnnotationCollection(),
 	alignment: 'left',
+	
+	size: function ()
+	{
+		return this.text.length
+	},
 	
 	delete: function (start, end)
 	{
@@ -85,7 +90,7 @@ module.exports = Model(
 		}
 		else
 		{
-			return this.render_annotation_tree(text, this.annotations.root)
+			return this.render_annotation_tree(text, this.annotations.tree)
 		}
 	},
 	

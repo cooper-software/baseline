@@ -24,10 +24,5 @@ module.exports = Model(
 	tag: 'SPAN',
 	tag_aliases: new Set([]),
 	attrs: new Set([]),
-	styles: new Set([]),
-	
-	compare_rank: function (other)
-	{
-		return this.rank - other.rank
-	}
+	styles: new Set([])
 })

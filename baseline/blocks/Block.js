@@ -2,12 +2,16 @@
 
 var Model = require('../Model'),
 	DomPoint = require('../selection/DomPoint'),
-	Point = require('../selection/Point')
+	Point = require('../selection/Point'),
+	TextRegion = require('../regions/TextRegion')
 
 module.exports = Model(
 {
+	// True if the block should be treated as a single, non-editable, non-navigable entity
+	opaque: false,
+	
 	// A list of regions contained within this block
-	regions: [],
+	regions: [new TextRegion()],
 	
 	// Create and return a VTree for this block
 	render: function ()
@@ -77,7 +81,7 @@ module.exports = Model(
 	{
 		var changed_region = this.regions[start.region].delete(
 			start.offset, 
-			end.region == start.region ? end.offset : this.regions[start.region].text.length
+			end.region == start.region ? end.offset : this.regions[start.region].size()
 		)
 		
 		if (end.region != start.region)
@@ -98,10 +102,15 @@ module.exports = Model(
 	
 	extract: function (start, end)
 	{
+		if (this.opaque)
+		{
+			return this
+		}
+		
 		var new_regions = this.regions.slice(start.region, end.region + 1),
 			last_region_index = new_regions.length - 1
 		
-		new_regions[last_region_index] = new_regions[last_region_index].delete(end.offset, new_regions[last_region_index].text.length)
+		new_regions[last_region_index] = new_regions[last_region_index].delete(end.offset, new_regions[last_region_index].size())
 		new_regions[0] = new_regions[0].delete(0, start.offset)
 		
 		return this.update({ regions: new_regions })
@@ -109,6 +118,11 @@ module.exports = Model(
 	
 	append_to: function (block)
 	{
+		if (this.opaque)
+		{
+			return [block, this]
+		}
+		
 		var first_region = this.regions[0],
 			last_region = block.last_region()
 		
@@ -155,7 +169,7 @@ module.exports = Model(
 			point: new Point({
 				block: point.block,
 				region: point.region-1,
-				offset: previous_region.text.length
+				offset: previous_region.size()
 			})
 		}
 	},
@@ -165,64 +179,115 @@ module.exports = Model(
 		return this.regions[this.regions.length -1]
 	},
 	
-	insert: function (point, blocks)
+	split: function (point)
 	{
-		// assert(point.region >= 0 && point.region < this.regions.length &&
-		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
+		var region = this.regions[point.region]
+		var start_block = this.update({
+			regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.size()) ])
+		})
+		var end_block = this.update({
+			regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+		})
 		
-		var region = this.regions[point.region],
-			start_block = this.update({
-				regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.text.length) ])
-			}),
-			end_block = this.update({
-				regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
-			}),
-			new_blocks,
-			new_point
-		
-		if (blocks && blocks.length > 0)
-		{
-			new_blocks = blocks[0].append_to(start_block)
-			
-			if (blocks.length == 1 && blocks[0].regions.length == 1 && new_blocks.length == 1)
-			{
-				new_blocks = end_block.append_to(new_blocks[0])
-				new_point = point.update(
-				{
-					offset: point.offset + blocks[0].regions[0].text.length
-				})
-			}
-			else
-			{
-				new_blocks.push(end_block)
-				new_point = new Point({
-					block: point.block + blocks.length,
-					region: 0,
-					offset: 0
-				})
-			}
-		}
-		else
-		{
-			new_blocks = [start_block, end_block]
-			new_point = new Point({
+		return {
+			blocks: [start_block, end_block],
+			point: new Point({
 				block: point.block + 1,
 				region: 0,
 				offset: 0
 			})
 		}
+	},
+	
+	insert: function (point, blocks)
+	{
+		// assert(point.region >= 0 && point.region < this.regions.length &&
+		//        point.offset >= 0 && point.offset < this.regions[point.region].length)
 		
-		return {
-			blocks: new_blocks,
-			point: new_point
+		if (this.opaque)
+		{
+			return {
+				blocks: [ this ].concat(blocks ? blocks : []),
+				point: point.update(
+				{
+					block: blocks ? point.block + blocks.length : point.block,
+					region: blocks ? 0 : point.region,
+					offset: 0
+				})
+			}
+		}
+		
+		var region = this.regions[point.region]
+		var start_block = this.update({
+			regions: this.regions.slice(0, point.region).concat([ region.delete(point.offset, region.size()) ])
+		})
+		var end_block = this.update({
+			regions: this.regions.slice(point.region+1).concat([ region.delete(0, point.offset) ])
+		})
+		
+		if (blocks && blocks.length > 0)
+		{
+			var new_point = {
+				block: point.block,
+				region: point.region,
+				offset: point.offset
+			}
+			
+			var new_blocks = blocks[0].append_to(start_block)
+			
+			if (new_blocks.length > 1)
+			{
+				new_point.block += 1
+			}
+			
+			var last_start_block = new_blocks[new_blocks.length-1]
+			new_point.region = last_start_block.regions.length-1
+			var last_start_region = last_start_block.regions[new_point.region]
+			new_point.offset = last_start_region.size()
+			
+			if (blocks.length > 1)
+			{
+				var middle_blocks = blocks.slice(1)
+				new_blocks = new_blocks.concat(middle_blocks)
+				
+				new_point.block += middle_blocks.length
+				var last_middle_block = middle_blocks[middle_blocks.length-1]
+				new_point.region = last_middle_block.regions.length-1
+				var last_middle_region = last_middle_block.regions[new_point.region]
+				new_point.offset = last_middle_region.size()
+			}
+			
+			var end_blocks = end_block.append_to(new_blocks[new_blocks.length-1])
+			new_blocks = new_blocks.slice(0, -1).concat(end_blocks)
+			
+			return {
+				blocks: new_blocks,
+				point: new Point(new_point)
+			}
+		}
+		else
+		{
+			return {
+				blocks: [start_block, end_block],
+				point: new Point({
+					block: point.block + 1,
+					region: 0,
+					offset: 0
+				})
+			}
 		}
 	},
 	
 	has_annotation: function (start, end, prototype_annotation)
 	{
+		if (this.opaque)
+		{
+			return false
+		}
+		
 		var start_region = this.regions[start.region]
 		
-		if (!start_region.has_annotation(start.offset, end.region == start.region ? end.offset : start_region.text.length, prototype_annotation))
+		if (!start_region.has_annotation(start.offset, end.region == start.region ? end.offset : start_region.size(), prototype_annotation))
 		{
 			return false
 		}
@@ -241,7 +306,7 @@ module.exports = Model(
 		
 		return this.regions.slice(start.region+1, end.region).every(function (region)
 		{
-			return region.has_annotation(0, region.text.length, prototype_annotation)
+			return region.has_annotation(0, region.size(), prototype_annotation)
 		})
 	},
 	
@@ -295,7 +360,7 @@ module.exports = Model(
 				}
 				else
 				{
-					if (!fn(region, start.offset, region.text.length))
+					if (!fn(region, start.offset, region.size()))
 					{
 						return false
 					}
@@ -310,7 +375,7 @@ module.exports = Model(
 			}
 			else
 			{
-				if (!fn(region, 0, region.text.length))
+				if (!fn(region, 0, region.size()))
 				{
 					return false
 				}

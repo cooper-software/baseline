@@ -7,8 +7,7 @@ var chai = require('chai'),
 	expect = require("chai").expect,
 	window = require('jsdom').jsdom().defaultView,
 	document = window.document,
-	AnnotationTree = require('../../baseline/annotations/AnnotationTree'),
-	AnnotationTreeNode = require('../../baseline/annotations/AnnotationTree'),
+	AnnotationCollection = require('../../baseline/annotations/AnnotationCollection'),
 	Annotation = require('../../baseline/annotations/Annotation'),
 	AnnotationType = require('../../baseline/annotations/AnnotationType'),
 	TextRegion = require('../../baseline/regions/TextRegion'),
@@ -24,7 +23,7 @@ describe('blocks.TextRegion', function ()
 		var text = new TextRegion()
 		expect(text.text).to.equal('')
 		expect(text.alignment).to.equal('left')
-		expect(text.annotations.constructor).to.equal(AnnotationTree)
+		expect(text.annotations.constructor).to.equal(AnnotationCollection)
 		expect(text.annotations.empty()).to.be.true
 	})
 	
@@ -41,7 +40,7 @@ describe('blocks.TextRegion', function ()
 		var text = new TextRegion(
 		{
 			text: 'foo bar baz',
-			annotations: (new AnnotationTree()).add(
+			annotations: (new AnnotationCollection()).add(
 				new Annotation(
 				{
 					type: new AnnotationType({ tag: 'em', attrs: new Set(['q', 'p']), styles: new Set(['x', 'y']) }),
@@ -75,7 +74,7 @@ describe('blocks.TextRegion', function ()
 			text = new TextRegion(
 			{
 				text: 'foo bar baz',
-				annotations: (new AnnotationTree()).set(
+				annotations: (new AnnotationCollection()).set(
 				[
 					new Annotation({ type: bold, offset: 2, length: 4 }),
 					new Annotation({ type: bold, offset: 9, length: 2 }),
@@ -284,7 +283,7 @@ describe('blocks.TextRegion', function ()
 		var ann_type = new AnnotationType({ tag: 'z' }),
 			region = new TextRegion({
 				text: 'Foo bar baz',
-				annotations: (new AnnotationTree()).concat([
+				annotations: (new AnnotationCollection()).set([
 					new Annotation({ offset: 4, length: 3, type: ann_type }),
 					new Annotation({ offset: 8, length: 3, type: ann_type })
 				])
@@ -304,7 +303,7 @@ describe('blocks.TextRegion', function ()
 		var ann_type = new AnnotationType({ tag: 'z' }),
 			region = new TextRegion({
 				text: 'Foo bar baz qux',
-				annotations: (new AnnotationTree()).concat([
+				annotations: (new AnnotationCollection()).set([
 					new Annotation({ offset: 4, length: 3, type: ann_type }),
 					new Annotation({ offset: 8, length: 3, type: ann_type })
 				])
@@ -330,17 +329,17 @@ describe('blocks.TextRegion', function ()
 	
 	it('can delete a range when there are annotations', function ()
 	{
-		var ann_type = new AnnotationType({ tag: 'foo' }),
-			region = new TextRegion({
-				text: 'This is some text',
-				annotations: (new AnnotationTree()).concat([
-					new Annotation({ offset: 0, length: 5, type: ann_type }),
-					new Annotation({ offset: 3, length: 5, type: ann_type }),
-					new Annotation({ offset: 12, length: 3, type: ann_type })
-				])
-			}),
-			changed_region = region.delete(1, 5),
-			changed_anns = changed_region.annotations.to_array()
+		var ann_type = new AnnotationType({ tag: 'foo' })
+		var region = new TextRegion({
+			text: 'This is some text',
+			annotations: (new AnnotationCollection()).set([
+				new Annotation({ offset: 0, length: 5, type: ann_type }),
+				new Annotation({ offset: 3, length: 5, type: ann_type }),
+				new Annotation({ offset: 12, length: 3, type: ann_type })
+			])
+		})
+		var changed_region = region.delete(1, 5)
+		var changed_anns = changed_region.annotations.to_array()
 		
 		expect(changed_region.text).to.equal('Tis some text')
 		expect(changed_anns.length).to.equal(2)
@@ -356,14 +355,14 @@ describe('blocks.TextRegion', function ()
 			region_a = new TextRegion(
 			{
 				text: 'foo',
-				annotations: (new AnnotationTree()).concat([
+				annotations: (new AnnotationCollection()).set([
 					new Annotation({ offset: 0, length: 2, type: ann_type })
 				])
 			}),
 			region_b = new TextRegion(
 			{
 				text: ' bar',
-				annotations: (new AnnotationTree()).concat([
+				annotations: (new AnnotationCollection()).set([
 					new Annotation({ offset: 1, length: 2, type: ann_type })
 				])
 			}),
@@ -396,7 +395,7 @@ describe('blocks.TextRegion', function ()
 			wrong_proto_ann = new Annotation({ type: type_b }),
 			region_a = new TextRegion({
 				text: 'Lorem ipsum dolor sit amet',
-				annotations: (new AnnotationTree()).concat([
+				annotations: (new AnnotationCollection()).set([
 					new Annotation({ offset: 0, length: 11, type: type_a, styles: { color: 'red' }, attrs: { alt: 'Foo' } }),
 					new Annotation({ offset: 11, length: 10, type: type_b  }),
 					new Annotation({ offset: 11, length: 6, type: type_a, styles: { color: 'red' }, attrs: { alt: 'Foo' } })

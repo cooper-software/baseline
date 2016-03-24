@@ -47,6 +47,11 @@ module.exports = Model(
 		})
 	},
 	
+	is_similar: function (other)
+	{
+		return Model.equals(this, other, ['type'])
+	},
+	
 	_get_range: function (offset_or_annotaton, length)
 	{
 		if (length === undefined)

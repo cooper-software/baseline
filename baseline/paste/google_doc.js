@@ -1,6 +1,7 @@
 "use strict"
 
 var vdom = require('../vdom')
+var model = require('../vdom/model')
 
 module.exports = 
 {
@@ -29,6 +30,23 @@ module.exports =
 	{
 		var root = document.createElement('div')
 		root.innerHTML = content
-		return vdom.parse(root.querySelector(':scope > b'))
+		var vtree = vdom.parse(root.querySelector(':scope > b'))
+		return new model.VirtualElement({
+			tag: 'DIV',
+			children: vtree.children.map(function (vnode)
+			{
+				if (vnode.tag == 'SPAN')
+				{
+					return new model.VirtualElement({
+						tag: 'P',
+						children: vnode.children
+					})
+				}
+				else
+				{
+					return vnode
+				}
+			})
+		})
 	}
 }

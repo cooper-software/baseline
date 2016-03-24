@@ -2,6 +2,7 @@
 
 var model = require('./model'),
 	VirtualText = model.VirtualText,
+	RawHTML = model.RawHTML,
 	watch = require('./watch')
 	
 
@@ -22,6 +23,17 @@ function render(document, vnode)
 	if (vnode.constructor == VirtualText)
 	{
 		vnode.dom_node = document.createTextNode(vnode.text)
+	}
+	else if (vnode.constructor == RawHTML)
+	{
+		var div = document.createElement('div')
+		div.innerHTML = vnode.html
+		var frag = document.createDocumentFragment()
+		while (div.hasChildNodes())
+		{
+			frag.appendChild(div.firstChild)
+		}
+		vnode.dom_node = frag
 	}
 	else
 	{

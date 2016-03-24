@@ -60,6 +60,7 @@ module.exports =
 		delete_at_boundary: require('./commands/delete_at_boundary'),
 		delete_range: require('./commands/delete_range'),
 		insert_block: require('./commands/insert_block'),
+		replace_block: require('./commands/replace_block'),
 		toggle_annotation: require('./commands/toggle_annotation'),
 		set_block_type: require('./commands/set_block_type'),
 		set_text_alignment: require('./commands/set_text_alignment'),

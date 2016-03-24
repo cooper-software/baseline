@@ -6,7 +6,8 @@ var chai = require('chai'),
 	sinon_chai = require('sinon-chai'),
 	window = require('jsdom').jsdom().defaultView,
 	document = window.document,
-	Block = require('../baseline/blocks/Block'),
+	SimpleBlock = require('../baseline/blocks/SimpleBlock'),
+	TextRegion = require('../baseline/regions/TextRegion'),
 	Editor = require('../baseline/Editor'),
 	Range = require('../baseline/selection/Range'),
 	Point = require('../baseline/selection/Point'),
@@ -87,6 +88,33 @@ describe('baseline.commands', function ()
 		expect(block_to_split.insert).to.have.been.called
 		var blocks = editor.document.blocks
 		expect(blocks.length).to.equal(3)
+	})
+	
+	it('can insert multiple blocks at the current point', function ()
+	{
+		var container = document.createElement('div')
+		container.innerHTML = '<p><b>This is block one.</b></p><p>This is block two.</p>'
+		
+		var editor = new Editor({
+			dom_window: window,
+			dom_document: document,
+			container: container
+		})
+		
+		editor.render()
+		
+		var point = new Point({ block: 0, region: 0, offset: 5 })
+		editor.range = new Range({ start: point, end: point })
+		
+		var block_to_split = editor.document.blocks[0]
+		editor.range.set_in_window(window, container, editor.document)
+		editor.commands.insert_block(editor, [
+			new SimpleBlock({ tag: 'P', regions: [ new TextRegion({ text: 'foo' })] }),
+			new SimpleBlock({ tag: 'P', regions: [ new TextRegion({ text: 'bar' })] })
+		])
+		var blocks = editor.document.blocks
+		expect(blocks.length).to.equal(3)
+		expect(blocks[0].regions[0].text).to.equal('This foo')
 	})
 	
 	it('has a command to merge a block with the block before it', function ()

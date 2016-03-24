@@ -8,6 +8,7 @@ module.exports =
 	Point: require('./selection/Point'),
 	AnnotationType: require('./annotations/AnnotationType'),
 	Annotation: require('./annotations/Annotation'),
+	Block: require('./blocks/SimpleBlock'),
 	SimpleBlock: require('./blocks/SimpleBlock'),
 	ListBlock: require('./blocks/ListBlock'),
 	FigureBlock: require('./blocks/FigureBlock'),

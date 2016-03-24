@@ -7,11 +7,6 @@ module.exports = function (editor)
 	var range = editor.range,
 		blocks = editor.document.blocks
 	
-	if (range.is_collapsed())
-	{
-		return
-	}
-	
 	editor.update_document(
 	{
 		blocks: blocks
@@ -31,7 +26,7 @@ module.exports = function (editor)
 										range.start, 
 										new Point({
 											region: start_block.regions.length - 1, 
-											offset: start_block.last_region().text.length
+											offset: start_block.last_region().size()
 										})),
 									truncated_end_block = end_block.delete(new Point({ region: 0, offset: 0 }), range.end)
 								

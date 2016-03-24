@@ -87,60 +87,71 @@ var VirtualElement = Model.extend(VirtualNode,
 		}
 	},
     
-    to_html: function ()
-    {
-        var html = '<' + this.tag.toLowerCase()
-        
-        if (this.properties.attributes)
-        {
-            var attrs = this.properties.attributes,
-                keys = Object.keys(attrs)
-            
-            if (keys.length > 0)
-            {
-                html += ' ' + keys.map(function (k)
-                {
-                    return k+'="'+attrs[k]+'"'
-                }).join(' ')
-            }
-        }
-        
-        if (this.properties.style)
-        {
-            var styles = this.properties.styles,
-                keys = Object.keys(attrs)
-                
-            if (keys.length > 0)
-            {
-                html += ' style="'
-                html += keys.map(function (k)
-                {
-                    return 'k:'+styles[k]
-                }).join(';')
-            }
-        }
-        
-        html += '>'
-        
-        html += this.children.map(function (c)
-        {
-            if (c.vnode)
-            {
-                return c.vnode.to_html()
-            }
-            else
-            {
-                return c.to_html()
-            }
-        }).join('')
-        
-        return html + '</'+ this.tag.toLowerCase() +'>'
-    }
+  to_html: function ()
+  {
+      var html = '<' + this.tag.toLowerCase()
+      
+      if (this.properties.attributes)
+      {
+          var attrs = this.properties.attributes,
+              keys = Object.keys(attrs)
+          
+          if (keys.length > 0)
+          {
+              html += ' ' + keys.map(function (k)
+              {
+                  return k+'="'+attrs[k]+'"'
+              }).join(' ')
+          }
+      }
+      
+      if (this.properties.style)
+      {
+          var styles = this.properties.style,
+              keys = Object.keys(styles)
+              
+          if (keys.length > 0)
+          {
+              html += ' style="'
+              html += keys.map(function (k)
+              {
+                  return k+':'+styles[k]
+              }).join(';')
+          }
+      }
+      
+      html += '>'
+      
+      html += this.children.map(function (c)
+      {
+          if (c.vnode)
+          {
+              return c.vnode.to_html()
+          }
+          else
+          {
+              return c.to_html()
+          }
+      }).join('')
+      
+      return html + '</'+ this.tag.toLowerCase() +'>'
+  }
+})
+
+var RawHTML = Model.extend(VirtualNode,
+{
+  html: '',
+    
+  to_html: function ()
+  {
+    return this.html
+  }
 })
 
 module.exports = 
 {
 	VirtualNode: VirtualNode,
 	VirtualText: VirtualText,
-	VirtualElement: VirtualElement
+	VirtualElement: VirtualElement,
+  RawHTML: RawHTML
 }
