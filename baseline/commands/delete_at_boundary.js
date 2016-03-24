@@ -11,36 +11,53 @@ module.exports = function (editor)
 	{
 		if (range.start.block > 0)
 		{
-			var new_blocks
-			if (blocks[range.start.block].opaque)
+			if (blocks[range.start.block-1].opaque)
 			{
-				new_blocks = [blocks[range.start.block-1]]
+				var new_blocks = blocks.slice()
+				new_blocks.splice(range.start.block-1, 1)
+				editor.update_document({
+					blocks: new_blocks
+				})
+				
+				var new_point = new Point(
+				{
+					block: range.start.block-1,
+					region: 0,
+					offset: 0
+				})
+				
+				editor.range = range.update({
+					start: new_point,
+					end: new_point
+				})
 			}
 			else
 			{
-				new_blocks = blocks[range.start.block].append_to(blocks[range.start.block-1])
+				editor.update_document(
+				{
+					blocks: blocks
+								.slice(0, range.start.block-1)
+								.concat(
+									blocks[range.start.block].append_to(blocks[range.start.block-1])
+								)
+								.concat(blocks.slice(range.start.block+1))
+				})
+				
+				var new_point = new Point(
+				{
+					block: range.start.block-1,
+					region: editor.document.blocks[range.start.block-1].regions.length - 1,
+					offset: blocks[range.start.block-1].last_region().size()
+				})
+				
+				editor.range = range.update(
+				{
+					start: new_point,
+					end: new_point
+				})
 			}
 			
-			editor.update_document(
-			{
-				blocks: blocks
-							.slice(0, range.start.block-1)
-							.concat(new_blocks)
-							.concat(blocks.slice(range.start.block+1))
-			})
-			
-			var new_point = new Point(
-			{
-				block: range.start.block-1,
-				region: editor.document.blocks[range.start.block-1].regions.length - 1,
-				offset: blocks[range.start.block-1].last_region().size()
-			})
-			
-			editor.range = range.update(
-			{
-				start: new_point,
-				end: new_point
-			})
+			editor.update_selection()
 		}
 	}
 	else
@@ -61,7 +78,7 @@ module.exports = function (editor)
 			start: result.point,
 			end: result.point
 		})
+		
+		editor.update_selection()
 	}
-	
-	editor.update_selection()
 }
