@@ -134,6 +134,10 @@ module.exports = Model(
           })
         )
       }
+      else
+      {
+        new_annotations.push(ann)
+      }
     })
     
     return this.set(new_annotations)

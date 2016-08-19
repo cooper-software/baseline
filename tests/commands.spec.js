@@ -90,6 +90,59 @@ describe('baseline.commands', function ()
 		expect(blocks.length).to.equal(3)
 	})
 	
+	it('maintains annotations when inserting a new block if the selection is at the end of the block', function ()
+	{
+		var container = document.createElement('div')
+		container.innerHTML = '<p>This is <b>block</b> one.</p>'
+		
+		var editor = new Editor({
+			dom_window: window,
+			dom_document: document,
+			container: container
+		})
+		
+		editor.render()
+		var annotations = editor.document.blocks[0].regions[0].annotations.annotations
+		expect(annotations.length).to.equal(1)
+		expect(annotations[0].type.tag).to.equal('B')
+		
+		var point = new Point({ block: 0, region: 0, offset: 14 })
+		editor.range = new Range({ start: point, end: point })
+		editor.range.set_in_window(window, container, editor.document)
+		editor.commands.insert_block(editor)
+		
+		var annotations = editor.document.blocks[0].regions[0].annotations.annotations
+		expect(annotations.length).to.equal(1)
+		expect(annotations[0].type.tag).to.equal('B')
+	})
+	
+	it('has a command to insert a block at the current point', function ()
+	{
+		var container = document.createElement('div')
+		container.innerHTML = '<p><b>This is block one.</b></p><p>This was block two.</p>'
+		
+		var editor = new Editor({
+			dom_window: window,
+			dom_document: document,
+			container: container
+		})
+		
+		editor.render()
+		
+		var point = new Point({ block: 0, region: 0, offset: 5 })
+		editor.range = new Range({ start: point, end: point })
+		
+		var block_to_split = editor.document.blocks[0]
+		sinon.spy(block_to_split, "insert")
+		editor.range.set_in_window(window, container, editor.document)
+		editor.commands.insert_block(editor)
+		editor.range.set_in_window(window, container, editor.document)
+		
+		expect(block_to_split.insert).to.have.been.called
+		var blocks = editor.document.blocks
+		expect(blocks.length).to.equal(3)
+	})
+	
 	it('can insert multiple blocks at the current point', function ()
 	{
 		var container = document.createElement('div')
